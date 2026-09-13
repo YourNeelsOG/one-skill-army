@@ -1,0 +1,15 @@
+{
+  "name": "one-skill-army",
+  "description": "One Skill Army: minimal code, token discipline, workflow + TDD, anti-hallucination, code-commenting rules, git-safety rails, cross-session memory",
+  "owner": {
+    "name": "One Skill Army contributors"
+  },
+  "plugins": [
+    {
+      "name": "one-skill-army",
+      "description": "Minimal code, token discipline, workflow + TDD, anti-hallucination, code-commenting rules, git-safety rails, cross-session memory",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

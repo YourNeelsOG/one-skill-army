@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# One Skill Army commit-msg hook: refuses commit messages that mention an
+# AI tool, so assistants (Cursor, Copilot, Claude, ...) can never sign a
+# commit. Installed per project by scripts/install-git-hooks.sh
+# (core.hooksPath=.githooks). Override for a confirmed false positive:
+# git commit --no-verify, and say so in the session.
+set -uo pipefail
+
+if [ $# -lt 1 ]; then
+  echo "One Skill Army commit-msg: expected commit message file argument" >&2
+  exit 1
+fi
+
+# AI tool names as standalone words, self-attribution phrases, and AI
+# co-author trailers. Word boundaries keep "chatgpt" out of "gpt" matches
+# and vice versa.
+pattern='\b(cursor|copilot|claude|chatgpt|gpt|gemini|openai|anthropic|codeium|aider|devin|tabnine|codex)\b|generated (with|by|using)|ai[ -]generated|ai[ -]assisted'
+
+if match=$(grep -Ein "$pattern" "$1"); then
+  echo "One Skill Army commit-msg: refusing AI-attributed commit message:" >&2
+  printf '  %s\n' "$match" >&2
+  echo "Rewrite the message without AI mentions." >&2
+  echo "Confirmed false positive? git commit --no-verify, and say so." >&2
+  exit 1
+fi
+exit 0

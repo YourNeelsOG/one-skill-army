@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# One Skill Army pre-commit hook: refuses to commit env files or database
+# dumps. Installed per project by scripts/install-git-hooks.sh
+# (core.hooksPath=.githooks). Override for a confirmed false positive:
+# git commit --no-verify, and say so in the session.
+set -uo pipefail
+
+blocked=()
+while IFS= read -r -d '' f; do
+  base="$(basename "$f")"
+  keep=1
+  case "$base" in
+    .env|.env.local) keep=0 ;;
+    .env.*) [ "$base" = ".env.example" ] || keep=0 ;;
+    *.sql|*.dump|*.sqlite|*.sqlite3|*.db) keep=0 ;;
+  esac
+  [ "$keep" -eq 0 ] && blocked+=("$f")
+done < <(
+  if git rev-parse -q --verify HEAD >/dev/null 2>&1; then
+    git diff --cached --name-only -z --diff-filter=ACMR
+  else
+    git ls-files -z --cached
+  fi
+)
+
+if [ "${#blocked[@]}" -gt 0 ]; then
+  echo "One Skill Army pre-commit: refusing to commit protected files:" >&2
+  printf '  %s\n' "${blocked[@]}" >&2
+  echo "Unstage them: git restore --staged <file>; consider .gitignore." >&2
+  echo "Confirmed false positive? git commit --no-verify, and say so." >&2
+  exit 1
+fi
+exit 0

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# UserPromptSubmit hook for the One Skill Army pack.
+# Re-injects the harness brief on every user prompt so the disciplines never
+# drift and survive a mid-session model switch (a /model change does not fire
+# SessionStart, so per-turn re-injection is the only robust path).
+# Prefers the live engine brief ('osa hook prompt'); falls back to a static
+# line if the engine is unavailable. Contract: ALWAYS exit 0, one JSON object.
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+MODE="${OSA_DEFAULT_MODE:-}"
+if [ -z "$MODE" ] && [ -f ".osa/config.json" ]; then
+  MODE=$(python3 -c "import json;print(json.load(open('.osa/config.json')).get('defaultMode',''))" 2>/dev/null)
+fi
+if [ "$MODE" = "off" ]; then
+  exit 0
+fi
+LEVEL="${MODE:-full}"
+case "$LEVEL" in lite|full|ultra) ;; *) LEVEL="full" ;; esac
+
+# Live brief from the engine; static fallback keeps the hook working without it.
+reminder=$(PYTHONPATH="${PLUGIN_ROOT}" python3 -m osa hook prompt --level "$LEVEL" 2>/dev/null) || reminder=""
+if [ -z "$reminder" ]; then
+  reminder="One Skill Army active: ladder before code (does it need to exist? can it be shorter and still do the same work?), terse prose (never terse facts), verify before claiming done, no em dashes, git-safety rails hold. Read .osa/context.md instead of scanning the repo. Mode levels: lite/full/ultra/off only."
+fi
+
+escape_for_json() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+esc=$(escape_for_json "$reminder")
+
+# Match the host's expected hook-output shape (same hosts as session-start).
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{\n  "additional_context": "%s"\n}\n' "$esc"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "UserPromptSubmit",\n    "additionalContext": "%s"\n  }\n}\n' "$esc"
+else
+  printf '{\n  "additionalContext": "%s"\n}\n' "$esc"
+fi
+exit 0

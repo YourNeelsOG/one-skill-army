@@ -1,0 +1,24 @@
+{
+  "name": "one-skill-army",
+  "version": "2.0.0",
+  "description": "One Skill Army: minimal code, token discipline, structured workflow, TDD, systematic debugging, verification, anti-hallucination, code-commenting rules, git-safety rails, and cross-session project memory.",
+  "author": {
+    "name": "One Skill Army contributors"
+  },
+  "homepage": "https://github.com/YourNeelsOG/one-skill-army",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "minimal-code",
+    "token-discipline",
+    "tdd",
+    "debugging",
+    "anti-hallucination",
+    "memory",
+    "git-safety"
+  ],
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json",
+  "skills": "./skills/"
+}

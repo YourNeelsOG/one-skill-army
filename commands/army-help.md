@@ -39,7 +39,7 @@ list these four and ask.
 | code-review | Work complete, or review feedback arrives |
 | using-git-worktrees | Risky or parallel work needing isolation |
 | army-commit | "write a commit" |
-| osa-map | Project structure/dependency questions: query the osa map first |
+| mapit | Project structure/dependency questions: query the osa map first |
 
 ## Engine (osa)
 
@@ -50,11 +50,13 @@ for a repo checkout).
 
 | Command | Does |
 |---------|------|
-| `python3 -m osa index .` | Build the map: `.osa/graph.json` + `context.md` |
-| `python3 -m osa context <term>` | Smallest useful slice, no repo scan |
-| `python3 -m osa fresh --auto` | Re-index only changed files |
-| `python3 -m osa explain <node>` | Node role: degree, community, betweenness |
-| `python3 -m osa path <a> <b>` | Shortest path between two parts |
+| `python3 -m osa index .` | Full build: `graph.json`, `context.md`, `GRAPH_REPORT.md`, `graph.html` |
+| `python3 -m osa update .` | Incremental: re-parse only changed files |
+| `python3 -m osa query "<question>"` | Subgraph for a plain-language question |
+| `python3 -m osa explain <node>` | Node relations, EXTRACTED or INFERRED |
+| `python3 -m osa path <a> <b>` | Shortest path with each hop's relation |
+| `python3 -m osa affected <node>` | What depends on a node |
+| `python3 -m osa context <term>` | Substring slice, no repo scan |
 | `python3 -m osa measure` | Tokens the map saves vs reading the tree |
 
 ## Commands
@@ -67,7 +69,7 @@ for a repo checkout).
 | /army-debt | Harvest `osa:` shortcut markers into a ledger |
 | /army-compress | Compress a memory/instruction file to terse, backup + gate |
 | /army-gain | Measured-impact scoreboard (honest numbers only) |
-| /osa-map [status\|update\|query] | Build, refresh, or query the osa project map |
+| /mapit [update\|status\|query\|explain\|path\|affected] | Update or query the osa project map |
 | /army-help | This card |
 
 ## Deactivate

@@ -24,7 +24,7 @@ enabled = ["one-skill-army"]
 
 Restart the session. Verify with `grok inspect`; skills appear as
 `/army`, `/army-review`, `/army-audit`, `/army-debt`, `/army-compress`,
-`/army-gain`, `/army-help`, `/osa-map`. Grok can auto-invoke skills from their
+`/army-gain`, `/army-help`, `/mapit`. Grok can auto-invoke skills from their
 descriptions; use `/army lite|full|ultra` to make it explicit.
 
 ### Route B: instruction-only from a checkout
@@ -65,7 +65,7 @@ python3 -m osa fresh --auto     # after edits
 
 ## Skills (18, routed by the orchestrator)
 
-Ten core disciplines plus `input-discipline`, `army-commit`, `osa-map`, and the
+Ten core disciplines plus `input-discipline`, `army-commit`, `mapit`, and the
 process skills `writing-plans`, `subagent-driven-development`, `code-review`,
 `using-git-worktrees`.
 

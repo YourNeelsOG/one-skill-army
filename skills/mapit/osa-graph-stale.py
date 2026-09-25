@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""osa-map helper for the One Skill Army pack.
+"""mapit helper for the One Skill Army pack.
 
 Run inside a project. Maintains .osa/graph/manifest.jsonl as a sha256
 baseline of the working tree and reports which files changed since the
@@ -79,7 +79,7 @@ def report():
     "Print the machine-readable stale report plus one human summary line."
     old = load_manifest()
     if old is None:
-        print("osa-map: no .osa/graph/manifest.jsonl yet; "
+        print("mapit: no .osa/graph/manifest.jsonl yet; "
               "run again with --update to index this project")
         return
     cur = snapshot()
@@ -96,9 +96,9 @@ def report():
         print("DELETED", p)
     print("END")
     if not (added or modified or deleted):
-        print("osa-map: no changes")
+        print("mapit: no changes")
     else:
-        print(f"osa-map: {len(added)} added, {len(modified)} modified, "
+        print(f"mapit: {len(added)} added, {len(modified)} modified, "
               f"{len(deleted)} deleted")
 
 
@@ -119,7 +119,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>osa-map</title>
+<title>mapit</title>
 <style>
 body{margin:0;font-family:ui-monospace,monospace;background:#111;color:#ddd;overflow:hidden}
 #bar{padding:6px 10px;background:#1b1b1b;font-size:13px;border-bottom:1px solid #333}
@@ -130,7 +130,7 @@ canvas{display:block;cursor:grab}
 </style>
 </head>
 <body>
-<div id="bar"><b>osa-map</b> <span id="count"></span>
+<div id="bar"><b>mapit</b> <span id="count"></span>
 <input id="q" placeholder="filter nodes">
 <span id="legend"></span></div>
 <canvas id="c"></canvas>
@@ -221,9 +221,9 @@ def render_html():
     data = json.dumps({"nodes": nodes, "edges": edges}).replace("</", "<\\/")
     if not nodes:
         html = ("<!DOCTYPE html><html><head><meta charset='utf-8'>"
-                "<title>osa-map</title></head><body style='background:#111;"
+                "<title>mapit</title></head><body style='background:#111;"
                 "color:#ddd;font-family:monospace;padding:2em'>"
-                "<h2>osa-map: empty graph</h2>"
+                "<h2>mapit: empty graph</h2>"
                 "<p>Record nodes and edges in .osa/graph/nodes.jsonl and "
                 "edges.jsonl during tasks, then re-run --html.</p>"
                 "</body></html>")
@@ -231,12 +231,12 @@ def render_html():
         html = HTML_TEMPLATE.replace("__DATA__", data)
     GRAPH_DIR.mkdir(parents=True, exist_ok=True)
     (GRAPH_DIR / "graph.html").write_text(html)
-    print(f"osa-map: wrote .osa/graph/graph.html "
+    print(f"mapit: wrote .osa/graph/graph.html "
           f"({len(nodes)} nodes, {len(edges)} edges)")
 
 
 def main():
-    ap = argparse.ArgumentParser(description="osa-map staleness + HTML helper")
+    ap = argparse.ArgumentParser(description="mapit staleness + HTML helper")
     ap.add_argument("--update", action="store_true", help="rewrite the manifest")
     ap.add_argument("--html", action="store_true", help="render graph.html")
     args = ap.parse_args()
@@ -244,7 +244,7 @@ def main():
         render_html()
     elif args.update:
         write_manifest()
-        print(f"osa-map: manifest updated "
+        print(f"mapit: manifest updated "
               f"({len(snapshot())} files indexed)")
     else:
         report()

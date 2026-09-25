@@ -19,7 +19,7 @@ scripts/install.sh claude --uninstall
 ```
 
 Re-running it is the upgrade: it prunes skills/commands retired in past
-versions (e.g. the old `graphify`, renamed to `osa-map`), copies the current
+versions (e.g. the old `osa-map`, renamed to `mapit`), copies the current
 set with the bundled `osa.pyz`, and stamps `~/.claude/.one-skill-army-version`.
 
 ## Install (manual)
@@ -64,10 +64,10 @@ survive a mid-session model switch and context compaction.
 The ten core disciplines (`memory`, `minimal-code`, `token-discipline`,
 `workflow`, `test-driven-development`, `systematic-debugging`,
 `verification-before-completion`, `anti-hallucination`, `code-commenting`,
-`git-safety`) plus `input-discipline`, `army-commit`, `osa-map`, and the
+`git-safety`) plus `input-discipline`, `army-commit`, `mapit`, and the
 process skills `writing-plans`, `subagent-driven-development`, `code-review`,
 and `using-git-worktrees`. Commands: `/army`, `/army-review`, `/army-audit`,
-`/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/osa-map`.
+`/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/mapit`.
 
 ## Platform notes
 

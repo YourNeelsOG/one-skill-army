@@ -15,7 +15,8 @@ def session_start(root=".", level="full"):
     "Refresh the index if stale, then return the brief plus a context pointer."
     status = check(root)
     if not status["fresh"]:
-        write_index(root, html=False)  # startup stays fast; HTML is for `osa index`
+        # Startup stays fast: incremental, and HTML is left to `osa index`.
+        write_index(root, html=False, incremental=True)
     lines = [brief(level=level)]
     if load_graph(root) is not None:
         lines.append("")

@@ -131,12 +131,12 @@ store; file-based `.osa/memory/` is the fallback, not a shadow copy:
   codebase-relationship questions: run `python3 -m osa index .` once, read
   `.osa/context.md` first, then `python3 -m osa context <term>` for a focused
   slice. After modifying code, `python3 -m osa fresh --auto` keeps the graph
-  current. Deterministic, no external package. See the osa-map skill.
+  current. Deterministic, no external package. See the mapit skill.
 - **graphify** (`graphify-out/` present, external tool): if a project already
   uses the external graphify tool, read `graphify-out/GRAPH_REPORT.md` first
   and prefer `graphify update .` there instead of a parallel graph.
 - **manual edges** (`.osa/graph/edges.jsonl`): for relationships the parser
-  cannot infer, record them with evidence, then run the osa-map skill's
+  cannot infer, record them with evidence, then run the mapit skill's
   `osa-graph-stale.py --update` and `--html` at task end. Source of truth is
   the files; the graph is an index.
 - **ai-memory / MCP memory servers**: durable pages, cross-session recall,

@@ -35,21 +35,24 @@ class TestPythonExtractor(unittest.TestCase):
         defines = [e for e in result["edges"] if e["rel"] == "defines"]
         self.assertIn(
             {"source": "pkg/mod.py", "target": "pkg/mod.py::greet",
-             "rel": "defines"},
+             "rel": "defines", "confidence": "EXTRACTED"},
             defines,
         )
 
-    def test_extracts_import_as_module_node_and_imports_edge(self):
+    def test_import_is_a_pending_edge_with_external_fallback(self):
+        # One file cannot tell a local module from an external package, so
+        # the import is left for osa/resolve.py with both options listed.
         result = extract("pkg/mod.py", "import os\n")
-        modules = [n for n in result["nodes"] if n["kind"] == "module"]
-        self.assertTrue(any(m["name"] == "os" for m in modules))
         imports = [e for e in result["edges"] if e["rel"] == "imports"]
-        self.assertTrue(any(e["target"] == "os" for e in imports))
+        self.assertEqual(imports[0]["resolve"]["files"],
+                         ["os.py", "os/__init__.py"])
+        self.assertEqual(imports[0]["resolve"]["module"], "os")
 
     def test_extracts_from_import_module(self):
         result = extract("pkg/mod.py", "from collections import OrderedDict\n")
         imports = [e for e in result["edges"] if e["rel"] == "imports"]
-        self.assertTrue(any(e["target"] == "collections" for e in imports))
+        self.assertTrue(any(e["resolve"]["module"] == "collections"
+                            for e in imports))
 
     def test_async_function_counts_as_function_symbol(self):
         result = extract("pkg/mod.py", "async def fetch():\n    return 1\n")
@@ -62,14 +65,16 @@ class TestPythonExtractor(unittest.TestCase):
         calls = [e for e in result["edges"] if e["rel"] == "calls"]
         self.assertIn(
             {"source": "pkg/mod.py::a", "target": "pkg/mod.py::b",
-             "rel": "calls"},
+             "rel": "calls", "confidence": "EXTRACTED", "line": 2},
             calls,
         )
 
     def test_no_calls_edge_to_undefined_name(self):
-        # Calls to names not defined in this file are not invented as edges.
+        # Calls to names not defined in this file are never final edges; at
+        # most they are pending, and the resolver drops them unless unique.
         result = extract("pkg/mod.py", "def a():\n    external_thing()\n")
-        calls = [e for e in result["edges"] if e["rel"] == "calls"]
+        calls = [e for e in result["edges"]
+                 if e["rel"] == "calls" and "target" in e]
         self.assertEqual(calls, [])
 
 

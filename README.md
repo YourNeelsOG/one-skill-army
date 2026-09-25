@@ -10,7 +10,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/skills-18-blue" alt="18 skills">
   <img src="https://img.shields.io/badge/engine-zero_dependencies-brightgreen" alt="zero deps">
-  <img src="https://img.shields.io/badge/tests-81_passing-brightgreen" alt="81 tests">
+  <img src="https://img.shields.io/badge/tests-188_passing-brightgreen" alt="188 tests">
   <img src="https://img.shields.io/badge/python-3.8%2B-blue" alt="python 3.8+">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT">
 </p>
@@ -100,7 +100,7 @@ It brings together the four best ideas in agent tooling and reimplements each on
 
 ### The disciplines
 
-`memory` · `minimal-code` · `token-discipline` · `workflow` · `test-driven-development` · `systematic-debugging` · `verification-before-completion` · `anti-hallucination` · `code-commenting` · `git-safety` · `input-discipline` · `writing-plans` · `subagent-driven-development` · `code-review` · `using-git-worktrees` · `army-commit` · `osa-map`
+`memory` · `minimal-code` · `token-discipline` · `workflow` · `test-driven-development` · `systematic-debugging` · `verification-before-completion` · `anti-hallucination` · `code-commenting` · `git-safety` · `input-discipline` · `writing-plans` · `subagent-driven-development` · `code-review` · `using-git-worktrees` · `army-commit` · `mapit`
 
 They are composable, and [`skills/one-skill-army/SKILL.md`](skills/one-skill-army/SKILL.md) is the single orchestrator that routes to them. One file is enough for an agent to follow the whole system.
 
@@ -113,15 +113,20 @@ Priority when they conflict, safety first: **git-safety > anti-hallucination > v
 It ships as a single bundled file, `osa.pyz`, inside the skills, so it runs anywhere with no install and no path setup: `python3 ~/.claude/skills/one-skill-army/osa.pyz <command>` (or `python3 -m osa <command>` from a repo checkout). The commands below use the short `osa` alias from the install step.
 
 ```bash
-osa index .                      # build the map: graph.json + context.md + graph.html
-osa context <term>               # smallest useful slice for a task, no repo scan
-osa fresh --auto                 # re-index only the files that changed
-osa explain <node>               # a node's role: degree, community, betweenness
-osa path <a> <b>                 # shortest path between two parts of the code
+osa index .                      # full build: graph.json, context.md, GRAPH_REPORT.md, graph.html
+osa update .                     # incremental: re-parse only changed files (--force for all)
+osa query "<question>"           # relevant subgraph for a plain-language question
+osa explain <node>               # a node's relations, grouped, EXTRACTED or INFERRED
+osa path <a> <b>                 # shortest path, with the relation of every hop
+osa affected <node>              # what depends on it: reverse imports, calls, inherits
+osa god-nodes                    # most connected nodes
+osa context <term>               # substring slice (kept for hooks and scripts)
 osa export html                  # self-contained force-directed view (or graphml)
 osa measure                      # how many tokens the map saves vs reading the tree
 osa brief                        # the always-on discipline directive the hooks inject
 ```
+
+It parses Python (real AST), JS/TS, Go, Rust, Java, SQL, shell, JSON/YAML/TOML and Markdown. Every edge is labelled `EXTRACTED` (read straight from the syntax) or `INFERRED` (matched by a heuristic, with the reason recorded), so you can tell a fact from a guess; `GRAPH_REPORT.md` lists every inferred edge for review. Add `--json` to any query command for machine output.
 
 The map carries real analysis with no model call: most-central files (betweenness), clusters (community detection), surprising cross-module links, and questions the graph can answer. On this repo `osa measure` reports about 99% fewer tokens to get oriented.
 
@@ -177,7 +182,7 @@ Check what you have against the source: `python3 -m osa version` (or
 `osa version` with the alias). The source version lives in `osa/__init__.py`.
 
 - **ZCode**: re-run the installer. It is the upgrade: it prunes skills and
-  commands retired in past versions (so a rename like `graphify` to `osa-map`
+  commands retired in past versions (so a rename like `osa-map` to `mapit`
   leaves no orphan), copies the current set, and restamps the version.
   ```bash
   scripts/install-zcode.sh --upgrade     # or just re-run: scripts/install-zcode.sh
@@ -195,7 +200,7 @@ Check what you have against the source: `python3 -m osa version` (or
   the marketplace, then reinstall or `plugin update`). The manifests carry the
   version, so the host sees the new release.
 - **Raw copy** (no installer): `cp -r skills/*` cannot prune, so remove renamed
-  items by hand, e.g. `rm -rf ~/.claude/skills/graphify` (renamed to osa-map).
+  items by hand, e.g. `rm -rf ~/.claude/skills/osa-map` (renamed to mapit).
 
 After any upgrade, start a new session so the pack reloads, and run
 `python3 -m osa index .` to rebuild the map with the latest engine.
@@ -213,7 +218,7 @@ Slash commands (once installed in your tool):
 | `/army-gain` | measured-impact scoreboard, honest counted numbers only |
 | `/army-compress` | compress a memory or instruction file to terse, with a backup |
 | `/army-help` | reference card: levels, skills, commands |
-| `/osa-map [status\|update\|query]` | build, refresh, or query the project map via `osa` |
+| `/mapit [update\|status\|query\|explain\|path\|affected]` | bring the project map up to date, or ask it a question, via `osa` |
 
 ## How it compares
 

@@ -12,7 +12,7 @@ scripts/install.sh gemini --doctor   # installed vs source version
 ```
 
 Re-running `scripts/install.sh gemini` is the upgrade: it prunes retired items
-(e.g. `graphify` renamed to `osa-map`) and restamps the version. A plain
+(e.g. `osa-map` renamed to `mapit`) and restamps the version. A plain
 `cp -r skills/* ~/.gemini/skills/` also works but cannot prune renames.
 
 ## Anchor file
@@ -36,10 +36,10 @@ auto-refresh.
 
 ## Skills (18, routed by the orchestrator)
 
-Ten core disciplines plus `input-discipline`, `army-commit`, `osa-map`, and the
+Ten core disciplines plus `input-discipline`, `army-commit`, `mapit`, and the
 process skills `writing-plans`, `subagent-driven-development`, `code-review`,
 `using-git-worktrees`. Commands: `/army`, `/army-review`, `/army-audit`,
-`/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/osa-map`.
+`/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/mapit`.
 
 ## Platform notes
 

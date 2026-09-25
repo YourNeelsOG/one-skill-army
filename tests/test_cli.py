@@ -86,6 +86,74 @@ class TestCli(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("cli.py", out)
 
+    def test_query_answers_with_subgraph(self):
+        run(["index", str(self.root)])
+        code, out = run(["query", "where is run", "--path", str(self.root)])
+        self.assertEqual(code, 0)
+        self.assertIn("cli.py::run", out)
+
+    def test_query_json(self):
+        import json
+        run(["index", str(self.root)])
+        code, out = run(["query", "run", "--json", "--budget", "500",
+                         "--depth", "1", "--path", str(self.root)])
+        self.assertEqual(code, 0)
+        self.assertIn("cli.py::run", json.loads(out)["nodes"])
+
+    def test_explain_shows_relations(self):
+        run(["index", str(self.root)])
+        code, out = run(["explain", "run", "--path", str(self.root)])
+        self.assertEqual(code, 0)
+        self.assertIn("defines", out)
+        self.assertIn("[E]", out)
+
+    def test_explain_ambiguous_lists_candidates_and_exits_2(self):
+        (self.root / "other.py").write_text("def run():\n    return 2\n")
+        run(["index", str(self.root)])
+        code, out = run(["explain", "run", "--path", str(self.root)])
+        self.assertEqual(code, 2)
+        self.assertIn("cli.py::run", out)
+        self.assertIn("other.py::run", out)
+
+    def test_explain_missing_exits_1(self):
+        run(["index", str(self.root)])
+        code, _ = run(["explain", "nothing_here", "--path", str(self.root)])
+        self.assertEqual(code, 1)
+
+    def test_path_shows_relation_per_hop(self):
+        run(["index", str(self.root)])
+        code, out = run(["path", "cli.py", "run", "--path", str(self.root)])
+        self.assertEqual(code, 0)
+        self.assertIn("defines", out)
+
+    def test_affected_lists_dependents(self):
+        (self.root / "app.py").write_text("from cli import run\n\n"
+                                          "def go():\n    run()\n")
+        run(["index", str(self.root)])
+        code, out = run(["affected", "cli.py", "--path", str(self.root)])
+        self.assertEqual(code, 0)
+        self.assertIn("app.py::go", out)
+
+    def test_god_nodes(self):
+        run(["index", str(self.root)])
+        code, out = run(["god-nodes", "--top", "1", "--json",
+                         "--path", str(self.root)])
+        self.assertEqual(code, 0)
+        import json
+        self.assertEqual(len(json.loads(out)), 1)
+
+    def test_update_incremental_and_no_viz(self):
+        run(["index", str(self.root)])
+        (self.root / "cli.py").write_text("def run():\n    return 2\n")
+        code, out = run(["update", str(self.root), "--no-viz"])
+        self.assertEqual(code, 0)
+        self.assertIn("1 re-extracted", out)
+
+    def test_index_accepts_no_viz(self):
+        code, _ = run(["index", str(self.root), "--no-viz"])
+        self.assertEqual(code, 0)
+        self.assertFalse((self.root / ".osa" / "graph.html").exists())
+
     def test_export_graphml_writes_file(self):
         run(["index", str(self.root)])
         code, out = run(["export", "graphml", "--path", str(self.root)])

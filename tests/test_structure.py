@@ -39,7 +39,7 @@ REQUIRED_SKILLS = [
     "test-driven-development", "systematic-debugging",
     "verification-before-completion", "anti-hallucination",
     "code-commenting", "git-safety", "army-commit", "input-discipline",
-    "osa-map", "writing-plans", "subagent-driven-development", "code-review",
+    "mapit", "writing-plans", "subagent-driven-development", "code-review",
     "using-git-worktrees",
 ]
 
@@ -366,7 +366,7 @@ if instg.is_file():
           (r.stdout + r.stderr).strip()[:80])
 
 print("graphify script:")
-gs = ROOT / "skills/osa-map/osa-graph-stale.py"
+gs = ROOT / "skills/mapit/osa-graph-stale.py"
 check("osa-graph-stale.py exists", gs.is_file())
 if gs.is_file():
     def _run_py(args, cwd):
@@ -418,7 +418,7 @@ if gs.is_file():
               and "http://" not in html)
 
 print("graphify pack wiring:")
-gskill = ROOT / "skills/osa-map/SKILL.md"
+gskill = ROOT / "skills/mapit/SKILL.md"
 check("graphify skill exists", gskill.is_file())
 if gskill.is_file():
     gt = gskill.read_text()
@@ -428,8 +428,8 @@ if gskill.is_file():
     check("graphify html viz", "graph.html" in gt and "--html" in gt)
     check("graphify edge recording discipline",
           "edges.jsonl" in gt and "evidence" in gt)
-gcmd = ROOT / "commands/osa-map.md"
-check("osa-map command exists", gcmd.is_file())
+gcmd = ROOT / "commands/mapit.md"
+check("mapit command exists", gcmd.is_file())
 if gcmd.is_file():
     check("graphify command description", "description:" in gcmd.read_text())
 check("memory routes to native graph",
@@ -437,7 +437,38 @@ check("memory routes to native graph",
       and ".osa/context.md" in skills.get("memory", ""))
 check("AGENTS.md native graph route",
       "osa context" in agents and ".osa/context.md" in agents)
-check("orchestrator routes osa-map", "osa-map" in orch)
+check("orchestrator routes mapit", "mapit" in orch)
+
+print("mapit rename:")
+manifest_sh = (ROOT / "scripts/pack-manifest.sh").read_text()
+check("osa-map skill retired", "RETIRED_SKILLS=(graphify osa-map)" in manifest_sh)
+check("osa-map command retired",
+      "RETIRED_COMMANDS=(graphify.md osa-map.md)" in manifest_sh)
+check("old osa-map dirs gone", not (ROOT / "skills/osa-map").exists()
+      and not (ROOT / "commands/osa-map.md").exists())
+# Rename history ("osa-map renamed to mapit") is the one allowed mention.
+live_refs = [str(f.relative_to(ROOT)) + ":" + line.strip()[:60]
+             for f in ROOT.rglob("*")
+             if f.is_file() and f.suffix in (".md", ".sh", ".json", ".py")
+             and not {".git", ".osa", "docs"} & set(f.relative_to(ROOT).parts)
+             and f.name not in ("test_structure.py", "pack-manifest.sh")
+             for line in f.read_text(errors="ignore").splitlines()
+             if "osa-map" in line and "rename" not in line]
+check("no live osa-map references", not live_refs, str(live_refs))
+
+print("version sync:")
+import json as _json
+import re as _re
+src_version = _re.search(r'__version__ = "([^"]+)"',
+                         (ROOT / "osa/__init__.py").read_text()).group(1)
+for mpath in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json",
+              ".cursor-plugin/plugin.json", ".zcode-plugin/plugin.json"):
+    data = _json.loads((ROOT / mpath).read_text())
+    check("version " + mpath, data.get("version") == src_version,
+          str(data.get("version")))
+mkt = _json.loads((ROOT / ".claude-plugin/marketplace.json").read_text())
+check("version marketplace",
+      all(pl.get("version") == src_version for pl in mkt["plugins"]))
 
 print()
 if FAILURES:

@@ -18,11 +18,11 @@ code-commenting > minimal-code > workflow > token-discipline.
 - For project structure and dependency questions, use the native osa engine:
   `python3 -m osa index .` once, read `.osa/context.md`, then
   `python3 -m osa context <term>`; `python3 -m osa fresh --auto` after changes.
-  Deterministic, no external package. See the osa-map skill.
+  Deterministic, no external package. See the mapit skill.
 - If the project runs the external graphify tool (`graphify-out/`) or an MCP
   memory server (ai-memory), route to it instead of duplicating.
 - For relationships the parser cannot infer, record manual edges with evidence
-  and run the osa-map skill's `osa-graph-stale.py` for the HTML view; source of
+  and run the mapit skill's `osa-graph-stale.py` for the HTML view; source of
   truth is the files, the graph is an index.
 
 ## 1. Minimal code (write less)

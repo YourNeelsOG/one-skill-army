@@ -1,18 +1,26 @@
 """Command-line entry point for the One Skill Army engine.
 
-Subcommands:
-  index [path]              build .osa/graph.json + context.md + manifest.json
-  context <query> [--path]  print the smallest useful context slice
-  fresh [path] [--auto]     report staleness; --auto reindexes changed files
+Subcommands (run `osa <command> -h` for options):
+  index [path]              full build: .osa/graph.json, context.md, graph.html
+  update [path]             incremental build: re-parse only changed files
+  query "<question>"        relevant subgraph for a plain-language question
+  explain <node>            a node's relations, grouped, with EXTRACTED/INFERRED
+  path <a> <b>              shortest path with the relation of every hop
+  affected <node>           what depends on a node (reverse traversal)
+  god-nodes                 most connected nodes
+  context <query>           substring slice (kept for older hooks and docs)
+  fresh [path] [--auto]     report staleness; --auto runs `update`
   brief [--level]           print the always-on harness directive
 
-Exit codes: 0 on success or fresh; 1 when `fresh` finds the index stale.
+Exit codes: 0 on success or fresh; 1 when `fresh` finds the index stale or a
+node is not found; 2 when a node name is ambiguous (candidates are printed).
 """
 import argparse
+import json
 
 from pathlib import Path
 
-from .analyze import explain as analyze_explain
+from .analyze import betweenness, communities
 from .analyze import shortest_path
 from .brief import brief
 from .context import context_slice
@@ -20,8 +28,10 @@ from .export import to_graphml, to_html
 from .fresh import check
 from .hook import prompt as hook_prompt
 from .hook import session_start as hook_session_start
+from .graph import degree
 from .index import build_graph
 from .measure import measure
+from .query import affected, describe, path_hops, query, resolve_node
 from .store import load_graph, write_index
 
 
@@ -30,12 +40,78 @@ def _graph_for(path):
     return load_graph(path) or build_graph(path)
 
 
-def _cmd_index(args):
-    summary = write_index(args.path, html=not args.no_html)
-    print("osa index: " + str(summary["nodes"]) + " nodes, "
-          + str(summary["edges"]) + " edges written to .osa/")
+def _emit(args, data, text):
+    "Print JSON when --json was given, otherwise the human text."
+    print(json.dumps(data, indent=2) if getattr(args, "json", False)
+          else text)
+
+
+def _resolve_or_report(graph, text):
+    "Return (node_id, exit_code); prints candidates or 'not found' on failure."
+    node, candidates = resolve_node(graph, text)
+    if node:
+        return node, 0
+    if candidates:
+        print("ambiguous '" + text + "', did you mean:")
+        for cand in candidates:
+            print("  " + cand)
+        return None, 2
+    print("no node matches '" + text + "'")
+    return None, 1
+
+
+def _report_build(label, summary):
+    print("osa " + label + ": " + str(summary["nodes"]) + " nodes, "
+          + str(summary["edges"]) + " edges written to .osa/ ("
+          + str(summary["extracted"]) + " re-extracted)")
     if summary["html"]:
-        print("osa index: wrote " + summary["html"] + " (open in a browser)")
+        print("osa " + label + ": wrote " + summary["html"]
+              + " (open in a browser)")
+
+
+def _cmd_index(args):
+    _report_build("index", write_index(args.path, html=not args.no_html))
+    return 0
+
+
+def _cmd_update(args):
+    summary = write_index(args.path, html=not args.no_html,
+                          incremental=not args.force)
+    _report_build("update", summary)
+    return 0
+
+
+def _cmd_query(args):
+    result = query(_graph_for(args.path), args.question, depth=args.depth,
+                   budget=args.budget, dfs=args.dfs)
+    _emit(args, {k: result[k] for k in ("seeds", "nodes", "edges")},
+          result["text"])
+    return 0
+
+
+def _cmd_affected(args):
+    graph = _graph_for(args.path)
+    node, code = _resolve_or_report(graph, args.node)
+    if not node:
+        return code
+    hits = affected(graph, node, depth=args.depth, relations=args.relation)
+    lines = ["Affected by " + node + " (depth " + str(args.depth) + "):"]
+    lines += ["  " + str(h["depth"]) + "  " + h["id"] + "  (" + h["rel"]
+              + ")" for h in hits] or ["  nothing depends on it"]
+    _emit(args, hits, "\n".join(lines))
+    return 0
+
+
+def _cmd_god_nodes(args):
+    graph = _graph_for(args.path)
+    deg = degree(graph)
+    kinds = {n["id"]: n.get("kind") for n in graph["nodes"]}
+    ranked = sorted((nid for nid in deg if kinds.get(nid) != "module"),
+                    key=lambda nid: (-deg[nid], nid))[:args.top]
+    rows = [{"id": nid, "degree": deg[nid], "kind": kinds[nid]}
+            for nid in ranked]
+    _emit(args, rows, "\n".join(str(r["degree"]).rjust(5) + "  " + r["id"]
+                                + " (" + str(r["kind"]) + ")" for r in rows))
     return 0
 
 
@@ -54,8 +130,9 @@ def _cmd_fresh(args):
         for path in result[label]:
             print(label.upper() + " " + path)
     if args.auto:
-        summary = write_index(args.path)
-        print("osa fresh: reindexed (" + str(summary["nodes"]) + " nodes)")
+        summary = write_index(args.path, incremental=True)
+        print("osa fresh: reindexed (" + str(summary["nodes"]) + " nodes, "
+              + str(summary["extracted"]) + " re-extracted)")
         return 0
     if result["manifest"] is None:
         print("osa fresh: not indexed yet; run 'osa index'")
@@ -91,13 +168,42 @@ def _cmd_measure(args):
 
 
 def _cmd_explain(args):
-    print(analyze_explain(_graph_for(args.path), args.node)["summary"])
+    graph = _graph_for(args.path)
+    node, code = _resolve_or_report(graph, args.node)
+    if not node:
+        return code
+    info = describe(graph, node)
+    comm = communities(graph).get(node)
+    info["community"] = comm
+    info["betweenness"] = round(betweenness(graph).get(node, 0.0), 2)
+    text = (info["text"] + "\n  community " + str(comm) + ", betweenness "
+            + str(info["betweenness"]))
+    _emit(args, {k: v for k, v in info.items() if k != "text"}, text)
     return 0
 
 
 def _cmd_path(args):
-    route = shortest_path(_graph_for(args.path), args.source, args.target)
-    print(" -> ".join(route) if route else "no path between the two nodes")
+    graph = _graph_for(args.path)
+    ends = []
+    for text in (args.source, args.target):
+        node, code = _resolve_or_report(graph, text)
+        if not node:
+            return code
+        ends.append(node)
+    route = shortest_path(graph, ends[0], ends[1])
+    hops = path_hops(graph, route)
+    if not route:
+        text = "no path between " + ends[0] + " and " + ends[1]
+    else:
+        lines = [route[0]]
+        for hop in hops:
+            tag = "[E]" if hop["confidence"] == "EXTRACTED" else "[I]"
+            arrow = ("--" + hop["rel"] + " " + tag + "-->"
+                     if hop["direction"] == "->"
+                     else "<--" + hop["rel"] + " " + tag + "--")
+            lines.append("  " + arrow + " " + hop["target"])
+        text = "\n".join(lines)
+    _emit(args, {"route": route, "hops": hops}, text)
     return 0
 
 
@@ -123,9 +229,47 @@ def main(argv=None):
 
     p_index = sub.add_parser("index", help="build the project graph")
     p_index.add_argument("path", nargs="?", default=".")
-    p_index.add_argument("--no-html", action="store_true",
+    p_index.add_argument("--no-html", "--no-viz", dest="no_html",
+                         action="store_true",
                          help="skip writing .osa/graph.html")
     p_index.set_defaults(func=_cmd_index)
+
+    p_update = sub.add_parser("update",
+                              help="incremental rebuild of changed files")
+    p_update.add_argument("path", nargs="?", default=".")
+    p_update.add_argument("--force", action="store_true",
+                          help="ignore the cache and re-parse every file")
+    p_update.add_argument("--no-viz", "--no-html", dest="no_html",
+                          action="store_true",
+                          help="skip writing .osa/graph.html")
+    p_update.set_defaults(func=_cmd_update)
+
+    p_query = sub.add_parser("query", help="answer a question with a subgraph")
+    p_query.add_argument("question")
+    p_query.add_argument("--path", default=".")
+    p_query.add_argument("--depth", type=int, default=2,
+                         help="hops out from the best matches (default 2)")
+    p_query.add_argument("--budget", type=int, default=2000,
+                         help="cap output at N tokens (default 2000)")
+    p_query.add_argument("--dfs", action="store_true",
+                         help="depth-first instead of breadth-first")
+    p_query.add_argument("--json", action="store_true")
+    p_query.set_defaults(func=_cmd_query)
+
+    p_aff = sub.add_parser("affected", help="what depends on a node")
+    p_aff.add_argument("node")
+    p_aff.add_argument("--path", default=".")
+    p_aff.add_argument("--depth", type=int, default=2)
+    p_aff.add_argument("--relation", action="append", default=None,
+                       help="only follow this relation (repeatable)")
+    p_aff.add_argument("--json", action="store_true")
+    p_aff.set_defaults(func=_cmd_affected)
+
+    p_god = sub.add_parser("god-nodes", help="most connected nodes")
+    p_god.add_argument("--path", default=".")
+    p_god.add_argument("--top", type=int, default=10)
+    p_god.add_argument("--json", action="store_true")
+    p_god.set_defaults(func=_cmd_god_nodes)
 
     p_context = sub.add_parser("context", help="print a context slice")
     p_context.add_argument("query")
@@ -150,15 +294,17 @@ def main(argv=None):
                         choices=["lite", "full", "ultra"])
     p_hook.set_defaults(func=_cmd_hook)
 
-    p_explain = sub.add_parser("explain", help="summarize a node's role")
+    p_explain = sub.add_parser("explain", help="a node's relations and role")
     p_explain.add_argument("node")
     p_explain.add_argument("--path", default=".")
+    p_explain.add_argument("--json", action="store_true")
     p_explain.set_defaults(func=_cmd_explain)
 
     p_path = sub.add_parser("path", help="shortest path between two nodes")
     p_path.add_argument("source")
     p_path.add_argument("target")
     p_path.add_argument("--path", default=".")
+    p_path.add_argument("--json", action="store_true")
     p_path.set_defaults(func=_cmd_path)
 
     p_export = sub.add_parser("export", help="export the graph to a file")

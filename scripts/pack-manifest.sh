@@ -8,13 +8,13 @@
 SKILLS=(one-skill-army memory minimal-code token-discipline workflow
         test-driven-development systematic-debugging
         verification-before-completion anti-hallucination code-commenting
-        git-safety army-commit input-discipline osa-map
+        git-safety army-commit input-discipline mapit
         writing-plans subagent-driven-development code-review
         using-git-worktrees)
 
 COMMANDS=(army.md army-review.md army-audit.md army-debt.md army-help.md
-          army-gain.md army-compress.md osa-map.md)
+          army-gain.md army-compress.md mapit.md)
 
 # Retired in past versions; pruned on every install so upgrades leave no orphan.
-RETIRED_SKILLS=(graphify)
-RETIRED_COMMANDS=(graphify.md)
+RETIRED_SKILLS=(graphify osa-map)
+RETIRED_COMMANDS=(graphify.md osa-map.md)

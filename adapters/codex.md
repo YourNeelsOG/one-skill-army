@@ -34,10 +34,10 @@ start of a task instead of re-scanning the tree.
 
 ## Skills (18, routed by the orchestrator)
 
-Ten core disciplines plus `input-discipline`, `army-commit`, `osa-map`, and the
+Ten core disciplines plus `input-discipline`, `army-commit`, `mapit`, and the
 process skills `writing-plans`, `subagent-driven-development`, `code-review`,
 `using-git-worktrees`. Commands: `/army`, `/army-review`, `/army-audit`,
-`/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/osa-map`.
+`/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/mapit`.
 
 ## Platform notes
 

@@ -39,7 +39,9 @@ def build_context(graph, budget=1500):
             parent = str(Path(node["id"]).parent)
             dirs[parent] += 1
 
-    lines = ["# Project map", ""]
+    lines = ["# Project map", "",
+             "Full report: .osa/GRAPH_REPORT.md. Ask: osa query \"<question>\"",
+             ""]
     lines.append("## Entrypoints")
     lines.extend("- " + e for e in eps) if eps else lines.append("- (none detected)")
 

@@ -17,15 +17,15 @@ scripts/install-zcode.sh --uninstall    # remove everything; project memory is k
 Upgrading: user-scope files under `~/.zcode/` do not change when you pull a new
 version of this repo. Re-run the installer to sync them. It records the version
 in `~/.zcode/.one-skill-army-version`, prunes skills/commands retired in past
-versions (for example the old `graphify` skill and `/graphify` command, renamed
-to `osa-map`), and `--doctor` reports drift so you know when a re-sync is due.
+versions (for example the old `osa-map` skill and `/osa-map` command, renamed
+to `mapit`), and `--doctor` reports drift so you know when a re-sync is due.
 
 ## Where things land
 
 | Resource | User scope | Notes |
 |---|---|---|
 | Skills | `~/.zcode/skills/<name>/SKILL.md` | 18 skills, every workspace |
-| Commands | `~/.zcode/commands/<name>.md` | `/army`, `/army-review`, `/army-audit`, `/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/osa-map` |
+| Commands | `~/.zcode/commands/<name>.md` | `/army`, `/army-review`, `/army-audit`, `/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/mapit` |
 | Engine | `~/.zcode/skills/one-skill-army/osa.pyz` | the bundled map engine, runs standalone |
 | Hook script | `~/.zcode/hooks/one-skill-army-session-start` | stable path; survives repo moves |
 | Hook config | `~/.zcode/cli/config.json` -> `hooks` | merged, never overwritten; backup created |

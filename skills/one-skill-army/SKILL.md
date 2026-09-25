@@ -98,14 +98,14 @@ git-safety > anti-hallucination > verification-before-completion
 - `subagent-driven-development`: fresh subagent per independent task, verify the diff.
 - `code-review`: request review with evidence; receive it with verification, not blind compliance.
 - `using-git-worktrees`: isolate risky or parallel work in its own worktree.
-- `osa-map`: the native project graph; read `.osa/context.md` before grepping.
+- `mapit`: the native project graph; read `.osa/context.md` before grepping.
 
 ## Routing
 
 | Situation | What leads |
 |---|---|
 | Session start, or just after compaction | memory (recall first, announce one line) |
-| Project-structure, dependency, or "where is X" question | the osa-map skill: read `.osa/context.md`, then `osa context <term>` (the native engine, replacing the external graphify tool) |
+| Project-structure, dependency, or "where is X" question | the mapit skill: read `.osa/context.md`, then `osa context <term>` (the native engine, replacing the external graphify tool) |
 | ANY git push, PR, or external-service action | git-safety (ask first) |
 | Any claim about code, files, or APIs | anti-hallucination |
 | About to say "done" or "fixed" | verification-before-completion |

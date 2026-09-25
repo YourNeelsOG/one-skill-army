@@ -59,11 +59,9 @@ class TestBuildGraph(unittest.TestCase):
         self.write("util.py", "def foo():\n    return 1\n")
         self.write("app.py", "import util\n")
         graph = build_graph(self.root)
-        imports = [e for e in graph["edges"] if e["rel"] == "imports"]
-        self.assertIn(
-            {"source": "app.py", "target": "util.py", "rel": "imports"},
-            imports,
-        )
+        imports = [(e["source"], e["target"], e["confidence"])
+                   for e in graph["edges"] if e["rel"] == "imports"]
+        self.assertIn(("app.py", "util.py", "EXTRACTED"), imports)
 
     def test_ambiguous_stem_is_not_resolved(self):
         # Two files share a stem: resolving would be a guess, so leave the
@@ -71,12 +69,10 @@ class TestBuildGraph(unittest.TestCase):
         self.write("a/util.py", "x = 1\n")
         self.write("b/util.py", "x = 1\n")
         self.write("app.py", "import util\n")
-        imports = [e for e in build_graph(self.root)["edges"]
+        imports = [(e["source"], e["target"])
+                   for e in build_graph(self.root)["edges"]
                    if e["rel"] == "imports"]
-        self.assertIn(
-            {"source": "app.py", "target": "util", "rel": "imports"},
-            imports,
-        )
+        self.assertIn(("app.py", "util"), imports)
 
 
 if __name__ == "__main__":

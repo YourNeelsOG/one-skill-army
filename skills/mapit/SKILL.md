@@ -1,5 +1,5 @@
 ---
-name: osa-map
+name: mapit
 description: >
   Persistent project-intelligence graph for the One Skill Army pack. The native
   osa engine auto-builds a deterministic graph from the code (no manual work,
@@ -7,10 +7,10 @@ description: >
   re-discovering the project. Optional manual edges capture relationships the
   parser cannot see, and osa-graph-stale.py renders the HTML view. Use when
   starting work in an indexed project, when asked about project structure or
-  dependencies, or when the user says osa-map or graph the project.
+  dependencies, or when the user says mapit or graph the project.
 ---
 
-# osa-map - persistent project intelligence
+# mapit - persistent project intelligence
 
 Purpose: stop re-discovering a project's structure every conversation. The
 graph stores what the project IS and how it CONNECTS; the agent queries it,
@@ -29,22 +29,32 @@ install: `python3 <skills>/one-skill-army/osa.pyz <command>`, or `python3 -m osa
 <command>` from a repo checkout.
 
 - `python3 -m osa index .` scans the project and writes `.osa/graph.json`
-  (files, symbols, imports, defines edges), `.osa/context.md` (the map the
-  agent reads: entrypoints, most-connected nodes, directory layout), and
-  `.osa/graph.html` (a self-contained force-directed view; `--no-html` skips
-  it). It prints where the HTML landed so you can open it in a browser.
-- Read `.osa/context.md` first, then `python3 -m osa context <term>` for the
-  smallest useful slice: the matching nodes and their direct neighbors, so you
-  find where something lives without scanning every file.
-- `python3 -m osa fresh --auto` re-indexes only the files that changed.
+  (files, symbols, and typed edges: imports, calls, inherits, defines,
+  contains, method_of, links_to, references), `.osa/context.md` (the short
+  map the agent reads first), `.osa/GRAPH_REPORT.md` (the full report), and
+  `.osa/graph.html` (an interactive view; `--no-viz` skips it).
+- Languages: Python (real AST), JS/TS, Go, Rust, Java, SQL, shell,
+  JSON/YAML/TOML, Markdown. Other files still appear as file nodes.
+- Every edge is `EXTRACTED` (read from syntax) or `INFERRED` (matched by a
+  heuristic, with a `reason`). Treat INFERRED edges as claims to verify.
+- `python3 -m osa update .` re-parses only changed files (`--force` for all).
+- `python3 -m osa query "<question>"` returns the subgraph around the best
+  matches; `explain <node>`, `path <a> <b>`, `affected <node>` and
+  `god-nodes` cover the rest. `--json` on each for machine output.
+- `python3 -m osa context <term>` is the older substring slice, kept for
+  hooks and scripts.
 
 The engine never invents an edge, so what it shows is real. Prefer it over broad
 search for structure and dependency questions.
 
 ## Storage (per project: .osa/)
 
-- `graph.json`: the native engine's deterministic graph (nodes + edges).
+- `graph.json`: the native engine's deterministic graph (nodes + edges,
+  schema 2 with edge confidence, plus any files it could not parse).
 - `context.md`: the token-bounded project map the agent reads first.
+- `GRAPH_REPORT.md`: the full report (counts, hubs, communities, every
+  INFERRED edge with its reason).
+- `cache/fragments.json`: per-file parse cache for incremental `update`.
 - `manifest.json`: the engine's sha256 freshness baseline.
 - `graph/`: the optional manual layer, described below.
 - `graph.html`: the rendered visualization, open in a browser.
@@ -54,8 +64,9 @@ Never merge graphs across projects.
 
 ## Optional manual layer (relationships the parser cannot see)
 
-The native engine covers structural edges (imports, defines, calls within a
-language). For semantic links it cannot infer (a route served by a controller,
+The native engine covers structural edges (imports, calls, inheritance,
+definitions, doc links, config paths). Manual edges are merged into
+`graph.json` as INFERRED edges with your evidence as the reason. For semantic links it cannot infer (a route served by a controller,
 a config that configures a service, a doc that documents a module), record them
 by hand in `.osa/graph/edges.jsonl`, one JSON per line, with `evidence` and the
 date:
@@ -71,11 +82,11 @@ rumor. Do not batch until "later": later never comes.
 `osa-graph-stale.py` ships next to this skill and handles the freshness baseline
 and the HTML view:
 
-- `python3 "<osa-map skill dir>/osa-graph-stale.py" --update` rewrites the
+- `python3 "<mapit skill dir>/osa-graph-stale.py" --update` rewrites the
   manifest baseline (run at task end).
-- `python3 "<osa-map skill dir>/osa-graph-stale.py"` (no flag) reports which
+- `python3 "<mapit skill dir>/osa-graph-stale.py"` (no flag) reports which
   files changed (ADDED / MODIFIED / DELETED) since the last baseline.
-- `python3 "<osa-map skill dir>/osa-graph-stale.py" --html` renders
+- `python3 "<mapit skill dir>/osa-graph-stale.py" --html` renders
   `.osa/graph/graph.html`: self-contained, no network, force-directed, drag
   nodes, hover for summaries, search to filter. Regenerate after meaningful
   graph changes.

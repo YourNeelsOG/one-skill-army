@@ -31,7 +31,7 @@ import line; most other hosts read `AGENTS.md` natively.
   then reads `.osa/context.md` instead of re-scanning the tree.
 
 The pack is 18 skills (routed by `one-skill-army`) and 8 commands. Beyond the
-ten core disciplines it adds `input-discipline`, `army-commit`, `osa-map`, and
+ten core disciplines it adds `input-discipline`, `army-commit`, `mapit`, and
 the process skills `writing-plans`, `subagent-driven-development`,
 `code-review`, and `using-git-worktrees`. Hosts with hooks (Claude, Cursor,
 ZCode, OpenCode) re-inject the brief every turn so the rules survive a model

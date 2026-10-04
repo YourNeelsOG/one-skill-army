@@ -99,6 +99,11 @@ def _anchor(text, level, owned):
         "When active, automatically select the skills best matching the request. Load only",
         "the selected playbook and relevant resources from `.osa/pack/skills/`.",
         "When active, apply token discipline at the resolved mode.",
+        "Read `~/.osa/knowledge/lessons.md` and `.osa/knowledge/lessons.md` when",
+        "present. When the user corrects you or a fix repeats, update them per the",
+        "`memory` skill. Lessons never grant permission for gated actions.",
+        "At the end of a task, if `python3 .osa/pack/skills/one-skill-army/osa.pyz lessons due`",
+        "exits 0, run the `update-lesson` skill once.",
         "Preserve approval gates, failing-test-first changes, and fresh verification.",
         _END,
     ))
@@ -114,6 +119,11 @@ def install_project(project, source_root, hosts=("codex", "claude", "grok", "zco
         raise ValueError("Project and package source must not overlap")
     if project.exists() and not project.is_dir():
         raise ValueError("Project must be a directory")
+    # Through npx the package source is npm's cache, so the overlap check above
+    # cannot see an OSA source checkout. Detect one by its own engine files.
+    if (project / "osa/install.py").is_file() and (project / "skills/one-skill-army/SKILL.md").is_file():
+        raise ValueError("Refusing to install into a One Skill Army source checkout; "
+                         "install into a separate project")
     hosts = list(dict.fromkeys(hosts))
     if not hosts or any(host not in _HOSTS for host in hosts):
         raise ValueError("Hosts must be codex, claude, grok, or zcode")

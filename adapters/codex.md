@@ -32,14 +32,14 @@ Codex has no per-turn context-injection hook, so the map does not auto-refresh:
 run `osa fresh --auto` after large edits, and read `.osa/context.md` at the
 start of a task instead of re-scanning the tree.
 
-## Skills (68, routed by the orchestrator)
+## Skills (69, routed by the orchestrator)
 
 Ten core disciplines plus `input-discipline`, `army-commit`, `mapit`, and the
 process skills `writing-plans`, `subagent-driven-development`, `code-review`,
 `using-git-worktrees`. The pack also ships command wrappers for hosts that
 support them.
 
-The pack includes 50 adapted pstack skills in addition to these 18 OSA
+The pack includes 50 adapted pstack skills in addition to these 19 OSA
 disciplines. In Codex, use `$poteto-mode` for task routing and `$setup-pstack`
 for model configuration. You can also write "use poteto mode" or "configure
 pstack models" in ordinary language. There is no `/pstack` entrypoint.
@@ -68,3 +68,15 @@ dependency setup.
 - token-discipline: `lite` prose / `ultra` commits
 - git-safety: always on
 - memory: `.osa/memory/` committed to the repo, shared with every other host
+
+## Lessons in the Codex sandbox
+
+`/update-lesson` (`$update-lesson` in Codex) reads recent chats and updates
+`~/.osa/knowledge/lessons.md` and `.osa/knowledge/lessons.md`. Codex in
+`workspace-write` cannot write your home folder: the harvest still runs and
+records its time in `.osa/knowledge/.last-harvest`, so the automatic run waits
+24 hours. To let Codex save personal lessons as well, start it with:
+
+```bash
+codex --add-dir ~/.osa/knowledge
+```

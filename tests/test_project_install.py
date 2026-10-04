@@ -86,6 +86,17 @@ class TestProjectInstall(unittest.TestCase):
         for name in ("army.md", "poteto-mode.md"):
             self.assertTrue((self.project / ".zcode/commands" / name).is_symlink())
 
+    def test_refuses_an_osa_source_checkout_without_mutation(self):
+        """npx runs from the npm cache, so the overlap check alone misses the source repo."""
+        (self.project / "osa").mkdir()
+        (self.project / "osa/install.py").write_text("# engine\n")
+        (self.project / "skills/one-skill-army").mkdir(parents=True)
+        (self.project / "skills/one-skill-army/SKILL.md").write_text("# orchestrator\n")
+        before = sorted(path.relative_to(self.project) for path in self.project.rglob("*"))
+        with self.assertRaisesRegex(ValueError, "source checkout"):
+            self.installer().install_project(self.project, self.source)
+        self.assertEqual(sorted(path.relative_to(self.project) for path in self.project.rglob("*")), before)
+
     def test_rejects_unsafe_inputs_without_mutation(self):
         api = self.installer()
         for kwargs in ({"hosts": ("unknown",)}, {"level": "maximum"}):

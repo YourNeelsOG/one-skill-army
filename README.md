@@ -1,7 +1,7 @@
 # One Skill Army
 
 <p>
-  <img src="https://img.shields.io/badge/skills-68-blue" alt="68 skills">
+  <img src="https://img.shields.io/badge/skills-69-blue" alt="69 skills">
   <img src="https://img.shields.io/badge/engine-zero_dependencies-brightgreen" alt="zero dependencies">
   <img src="https://img.shields.io/badge/python-3.8%2B-blue" alt="Python 3.8+">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT">
@@ -9,7 +9,7 @@
 
 One Skill Army (OSA) gives your coding agent a disciplined workflow, a token
 optimizer, project memory, and a dependency-free project graph. Version 2.2.0
-ships 68 skills, including all 50 adapted pstack skills, and works in Codex,
+ships 69 skills, including all 50 adapted pstack skills, and works in Codex,
 Claude Code, Grok, and ZCode from one project install.
 
 After one install command:
@@ -83,6 +83,9 @@ osa install . --hosts codex claude
 osa install . --level full
 ```
 
+Install into the project you want to work on, not into a clone of this
+repository: the installer refuses a One Skill Army source checkout.
+
 Re-running `osa install .` upgrades a project in place and keeps your own
 edits outside the OSA sections. Start a new chat afterwards so the host reloads
 its instructions and skill catalog.
@@ -134,7 +137,7 @@ your-project/
 | Codex | `AGENTS.md` | `.agents/skills` | none, Codex uses `$skill` and `/skills` |
 | Claude Code | `CLAUDE.md` | `.claude/skills` | `army-*` only |
 | Grok | `AGENTS.md` | `.grok/skills` | `army-*` only |
-| ZCode | `AGENTS.md` | `.zcode/skills` | all 58 |
+| ZCode | `AGENTS.md` | `.zcode/skills` | all 59 |
 
 Claude Code and Grok already list every skill as a slash entry, so a wrapper
 command with the same name would only duplicate it and cost catalog tokens on
@@ -333,6 +336,79 @@ Project memory lives in `.osa/memory/MEMORY.md` and `.osa/memory/HANDOFF.md`.
 The agent reads it at session start and writes a dated, sourced handoff at
 task end. Memory is treated as untrusted data: current files and your current
 instructions always win.
+
+### Lessons that update themselves
+
+You should never have to correct the same thing twice, in any agent. Two
+lessons files hold what you taught it:
+
+| File | Holds |
+|---|---|
+| `~/.osa/knowledge/lessons.md` | Your personal preferences, shared by every project and every host |
+| `.osa/knowledge/lessons.md` | Repeated fixes and conventions for this one project |
+
+```mermaid
+flowchart LR
+    A[You correct the agent or repeat a fix] --> B{Already a lesson?}
+    B -->|yes| C[Raise its seen count, refresh wording]
+    B -->|no| D[Add one dated line with your words as source]
+    C --> E[Agent tells you in one line]
+    D --> E
+    E --> F[Next session on any host reads both files at start]
+```
+
+The agent writes these on its own when you say things like "no", "don't",
+"always", "never", "from now on", or "remember this", and when the same kind
+of fix comes up a second time. Personal style goes to the user-wide file;
+anything about this repo goes to the project file, which wins when both
+cover the same point. Each file stays under 150 lines.
+
+### `/update-lesson`: learn from the last 48 hours
+
+Run `/update-lesson` (or `$update-lesson` in Codex) in any host, with any
+model behind it. It reads every chat from the last 48 hours across your
+agents and folds what you taught them into the two lessons files.
+
+```mermaid
+flowchart TD
+    A["/update-lesson, or automatic once per 24h at a task end"] --> B["osa lessons harvest"]
+    B --> C[Claude Code chats: ~/.claude/projects]
+    B --> D[Codex chats: ~/.codex/sessions]
+    B --> E[Any folder in OSA_TRANSCRIPT_DIRS]
+    C --> F[Keep only what you typed, drop tool output and injected files]
+    D --> F
+    E --> F
+    F --> G[Hide secrets, collapse copies, count real repeats, rank corrections first]
+    G --> H[Model decides what is a lesson]
+    H --> I[Personal: ~/.osa/knowledge/lessons.md]
+    H --> J[This repo: .osa/knowledge/lessons.md]
+```
+
+- **Automatic:** `osa lessons due` reports when the last harvest is more than
+  24 hours old. The session-start hook and the installed `AGENTS.md` and
+  `CLAUDE.md` section then tell the agent to run `update-lesson` once at the
+  end of its current task.
+- **Hosts:** Claude Code and Codex chats are read directly. ZCode keeps its
+  chat text out of local files today, so in ZCode the agent adds lessons from
+  the conversation it can see. For Grok, a DeepSeek client, or another app
+  that saves JSONL chats with `role` and `content` fields, add the folder to
+  `OSA_TRANSCRIPT_DIRS`.
+- **Codex sandbox:** Codex in `workspace-write` cannot write your home
+  folder. The harvest still runs and stores its time in the project, so it
+  does not repeat after every task. To let Codex save personal lessons too,
+  start it with `codex --add-dir ~/.osa/knowledge`.
+- **Newer wins:** answers you pick in a host question prompt are harvested as
+  `Chose "..."` lines, and a newer choice or current setting overrides an
+  older chat message.
+- **Preview:** `osa lessons harvest` prints the digest without changing any
+  lessons file. It does record the run time.
+- **Permission prompt:** Claude Code asks once before running the harvest
+  command. Allow it if you want automatic runs to go through without stopping.
+
+A lesson can only narrow how the agent works. It can never grant permission
+to push, merge, delete, publish, or touch secrets, and it never overrides
+what you say in the current chat. Edit or delete any line yourself at any
+time; the files are plain Markdown.
 
 Full contract: [AGENTS.md](AGENTS.md) and
 [the runtime policy](skills/poteto-mode/references/runtime.md).

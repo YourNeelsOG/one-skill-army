@@ -2,6 +2,7 @@
 
 Subcommands (run `osa <command> -h` for options):
   install [path]            install project skills and automatic routing
+  lessons harvest|due       digest recent chats for lessons.md, or check if due
   doctor [path]             verify the project installation
   index [path]              full build: .osa/graph.json, context.md, graph.html
   update [path]             incremental build: re-parse only changed files
@@ -18,6 +19,7 @@ Exit codes: 0 on success or fresh; 1 when `fresh` finds the index stale or a
 node is not found; 2 when a node name is ambiguous (candidates are printed).
 """
 import argparse
+import sys
 import json
 
 from pathlib import Path
@@ -181,6 +183,24 @@ def _cmd_doctor(args):
         return 0
     for issue in result["issues"]:
         print("osa doctor: " + issue)
+    return 1
+
+
+def _cmd_lessons(args):
+    "Print a harvest digest and record it, or report whether one is due."
+    from . import lessons
+    if args.action == "harvest":
+        print(lessons.render(lessons.harvest(hours=args.hours), budget=args.budget), end="")
+        try:
+            lessons.mark()
+        except OSError as error:
+            # The digest is still useful; only the automatic interval is lost.
+            print("osa lessons: could not record harvest time: " + str(error), file=sys.stderr)
+        return 0
+    if lessons.due(hours=args.hours):
+        print("Lessons harvest due: run update-lesson at the end of this task.")
+        return 0
+    print("Lessons harvest not due.")
     return 1
 
 
@@ -364,8 +384,17 @@ def main(argv=None):
     p_measure.add_argument("path", nargs="?", default=".")
     p_measure.set_defaults(func=_cmd_measure)
 
+    p_lessons = sub.add_parser("lessons", help="harvest chats for lessons.md, or check if due")
+    p_lessons.add_argument("action", choices=["harvest", "due"])
+    p_lessons.add_argument("--hours", type=float, default=None,
+                           help="harvest window (default 48) or due interval (default 24)")
+    p_lessons.add_argument("--budget", type=int, default=12000, help="max digest characters")
+    p_lessons.set_defaults(func=_cmd_lessons)
+
     p_version = sub.add_parser("version", help="print the pack version")
     p_version.set_defaults(func=_cmd_version)
 
     args = parser.parse_args(argv)
+    if args.command == "lessons" and args.hours is None:
+        args.hours = 48 if args.action == "harvest" else 24
     return args.func(args)

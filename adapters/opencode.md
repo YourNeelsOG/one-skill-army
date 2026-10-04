@@ -24,7 +24,7 @@ Tell the plugin where the pack lives (it registers `skills/` and
 export OSA_REPO_ROOT="/absolute/path/to/one-skill-army"   # in your shell profile
 ```
 
-Restart OpenCode. The plugin registers all 68 skills and the 58 commands
+Restart OpenCode. The plugin registers all 69 skills and the 59 commands
 (`/army`, `/army-review`, `/army-audit`, `/army-debt`, `/army-compress`,
 `/army-gain`, `/army-help`, `/mapit`) and appends a one-line reminder to the
 system prompt every turn, the OpenCode equivalent of ZCode's UserPromptSubmit
@@ -70,7 +70,7 @@ python3 -m osa context <term>
 python3 -m osa fresh --auto
 ```
 
-The 68 skills include `mapit` plus the process skills `writing-plans`,
+The 69 skills include `mapit` plus the process skills `writing-plans`,
 `subagent-driven-development`, `code-review`, and `using-git-worktrees`.
 
 ## Defaults

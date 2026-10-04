@@ -24,7 +24,7 @@ to `mapit`), and `--doctor` reports drift so you know when a re-sync is due.
 
 | Resource | User scope | Notes |
 |---|---|---|
-| Skills | `~/.zcode/skills/<name>/SKILL.md` | 68 skills, every workspace |
+| Skills | `~/.zcode/skills/<name>/SKILL.md` | 69 skills, every workspace |
 | Commands | `~/.zcode/commands/<name>.md` | `/army`, `/army-review`, `/army-audit`, `/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/mapit` |
 | Engine | `~/.zcode/skills/one-skill-army/osa.pyz` | the bundled map engine, runs standalone |
 | Hook script | `~/.zcode/hooks/one-skill-army-session-start` | stable path; survives repo moves |

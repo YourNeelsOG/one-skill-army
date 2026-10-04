@@ -11,7 +11,7 @@ from .fresh import check
 from .store import load_graph, write_index
 
 
-def session_start(root=".", level="full"):
+def session_start(root=".", level="ultra"):
     "Refresh the index if stale, then return the brief plus a context pointer."
     status = check(root)
     if not status["fresh"]:
@@ -25,6 +25,6 @@ def session_start(root=".", level="full"):
     return "\n".join(lines)
 
 
-def prompt(root=".", level="full"):
+def prompt(root=".", level="ultra"):
     "Return the brief to re-inject on every user prompt."
     return brief(level=level)

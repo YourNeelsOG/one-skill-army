@@ -34,12 +34,18 @@ Gemini CLI has no per-turn context-injection hook, so read `.osa/context.md`
 at task start and run `osa fresh --auto` after edits rather than expecting an
 auto-refresh.
 
-## Skills (18, routed by the orchestrator)
+## Skills (68, routed by the orchestrator)
 
 Ten core disciplines plus `input-discipline`, `army-commit`, `mapit`, and the
 process skills `writing-plans`, `subagent-driven-development`, `code-review`,
 `using-git-worktrees`. Commands: `/army`, `/army-review`, `/army-audit`,
 `/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/mapit`.
+
+The pack includes 50 adapted pstack skills in addition to these 18 OSA
+disciplines. Each has a command wrapper. Use `/poteto-mode` for task routing
+and `/setup-pstack` for model configuration. Resolve tools and models from the
+current host; missing delegation runs sequentially. OSA rules remain
+authoritative, and optional Bun helpers require separate dependency setup.
 
 ## Platform notes
 

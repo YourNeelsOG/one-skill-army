@@ -63,11 +63,17 @@ python3 -m osa context <term>   # read .osa/context.md first, then query
 python3 -m osa fresh --auto     # after edits
 ```
 
-## Skills (18, routed by the orchestrator)
+## Skills (68, routed by the orchestrator)
 
 Ten core disciplines plus `input-discipline`, `army-commit`, `mapit`, and the
 process skills `writing-plans`, `subagent-driven-development`, `code-review`,
 `using-git-worktrees`.
+
+The pack includes 50 adapted pstack skills in addition to these 18 OSA
+disciplines. Each has a command wrapper. Use `/poteto-mode` for task routing
+and `/setup-pstack` for model configuration. Resolve tools and models from the
+current host; missing delegation runs sequentially. OSA rules remain
+authoritative, and optional Bun helpers require separate dependency setup.
 
 ## Defaults
 

@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SKILL_FILE="${PLUGIN_ROOT}/skills/one-skill-army/SKILL.md"
 
-# Default-mode resolution: OSA_DEFAULT_MODE env > .osa/config.json > full.
+# Default-mode resolution: OSA_DEFAULT_MODE env > .osa/config.json > ultra.
 # "off" disables auto-activation entirely (emit nothing, exit clean).
 MODE="${OSA_DEFAULT_MODE:-}"
 if [ -z "$MODE" ] && [ -f ".osa/config.json" ]; then

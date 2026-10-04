@@ -17,8 +17,8 @@ fi
 if [ "$MODE" = "off" ]; then
   exit 0
 fi
-LEVEL="${MODE:-full}"
-case "$LEVEL" in lite|full|ultra) ;; *) LEVEL="full" ;; esac
+LEVEL="${MODE:-ultra}"
+case "$LEVEL" in lite|full|ultra) ;; *) LEVEL="ultra" ;; esac
 
 # Live brief from the engine; static fallback keeps the hook working without it.
 reminder=$(PYTHONPATH="${PLUGIN_ROOT}" python3 -m osa hook prompt --level "$LEVEL" 2>/dev/null) || reminder=""

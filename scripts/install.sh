@@ -16,7 +16,7 @@
 #   scripts/install.sh --dir PATH          install under a custom base dir
 #   scripts/install.sh claude --doctor     show installed vs source version
 #   scripts/install.sh claude --uninstall  remove skills + commands (memory kept)
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # shellcheck source=scripts/pack-manifest.sh
@@ -35,6 +35,15 @@ case "$host" in
 esac
 [ -n "$BASE" ] || { echo "ERROR: no target base dir"; exit 2; }
 
+# Reject overlapping trees before any replacement can delete source skills.
+python3 - "$REPO_ROOT" "$BASE" <<'PY'
+import sys
+from pathlib import Path
+source, target = (Path(value).resolve() for value in sys.argv[1:])
+if source == target or source in target.parents or target in source.parents:
+    sys.exit("ERROR: install destination must not overlap the source checkout")
+PY
+
 SKILLS_DIR="$BASE/skills"
 COMMANDS_DIR="$BASE/commands"
 RECEIPT="$BASE/.one-skill-army-version"
@@ -47,8 +56,8 @@ prune_retired() {
 
 do_install() {
   echo "==> Installing One Skill Army -> $BASE"
-  # Keep the bundled engine current before copying (best effort).
-  python3 "$REPO_ROOT/scripts/build-osa.py" >/dev/null 2>&1 || true
+  # A failed build must not install a stale engine or stamp a success receipt.
+  python3 "$REPO_ROOT/scripts/build-osa.py" >/dev/null
 
   local prev="none"
   [ -f "$RECEIPT" ] && prev="$(cat "$RECEIPT" 2>/dev/null)"

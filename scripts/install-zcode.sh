@@ -22,13 +22,16 @@
 # ZCode quirk this script exists for: config-file hooks are disabled unless
 # "hooks": { "enabled": true } is set, and the hook command must point at a
 # stable path (a repo path with spaces is a quoting trap).
-set -uo pipefail
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ZCODE_SKILLS="$HOME/.zcode/skills"
-ZCODE_COMMANDS="$HOME/.zcode/commands"
-ZCODE_HOOKS="$HOME/.zcode/hooks"
-ZCODE_CONFIG="$HOME/.zcode/cli/config.json"
+# Explicit destination overrides support isolated installs without changing HOME.
+ZCODE_BASE="${OSA_ZCODE_BASE:-$HOME/.zcode}"
+AGENTS_BASE="${OSA_AGENTS_BASE:-$HOME/.agents}"
+ZCODE_SKILLS="$ZCODE_BASE/skills"
+ZCODE_COMMANDS="$ZCODE_BASE/commands"
+ZCODE_HOOKS="$ZCODE_BASE/hooks"
+ZCODE_CONFIG="$ZCODE_BASE/cli/config.json"
 HOOK_NAME="one-skill-army-session-start"
 REMINDER_NAME="one-skill-army-prompt-reminder"
 PACK_NAME="one-skill-army"
@@ -39,7 +42,19 @@ PACK_NAME="one-skill-army"
 source "$REPO_ROOT/scripts/pack-manifest.sh"
 
 PACK_VERSION="$( (cd "$REPO_ROOT" && python3 -m osa version) 2>/dev/null || echo unknown )"
-VERSION_RECEIPT="$HOME/.zcode/.one-skill-army-version"
+VERSION_RECEIPT="$ZCODE_BASE/.one-skill-army-version"
+COMPAT_RECEIPT="$AGENTS_BASE/.one-skill-army-zcode-version"
+
+# Never replace files inside the source checkout or its ancestors.
+python3 - "$REPO_ROOT" "$ZCODE_BASE" "$AGENTS_BASE" <<'PY'
+import sys
+from pathlib import Path
+source = Path(sys.argv[1]).resolve()
+for value in sys.argv[2:]:
+    target = Path(value).resolve()
+    if source == target or source in target.parents or target in source.parents:
+        sys.exit("ERROR: install destination must not overlap the source checkout")
+PY
 
 backup_config() {
   if [ -f "$ZCODE_CONFIG" ]; then
@@ -159,10 +174,12 @@ do_install() {
 
   # Prune skills/commands retired in past versions so upgrades leave no orphans.
   for s in "${RETIRED_SKILLS[@]}"; do
-    rm -rf "$ZCODE_SKILLS/$s" "$HOME/.agents/skills/$s" 2>/dev/null
+    rm -rf "$ZCODE_SKILLS/$s" 2>/dev/null
+    if [ "${1:-}" = "--agents-compat" ]; then rm -rf "$AGENTS_BASE/skills/$s"; fi
   done
   for c in "${RETIRED_COMMANDS[@]}"; do
-    rm -f "$ZCODE_COMMANDS/$c" "$HOME/.agents/commands/$c" 2>/dev/null
+    rm -f "$ZCODE_COMMANDS/$c" 2>/dev/null
+    if [ "${1:-}" = "--agents-compat" ]; then rm -f "$AGENTS_BASE/commands/$c"; fi
   done
 
   for s in "${SKILLS[@]}"; do
@@ -219,15 +236,16 @@ Try:
 EOF
 
   if [ "${1:-}" = "--agents-compat" ]; then
-    mkdir -p "$HOME/.agents/skills" "$HOME/.agents/commands"
+    mkdir -p "$AGENTS_BASE/skills" "$AGENTS_BASE/commands"
     for s in "${SKILLS[@]}"; do
-      rm -rf "$HOME/.agents/skills/$s"
-      cp -r "$REPO_ROOT/skills/$s" "$HOME/.agents/skills/$s"
+      rm -rf "$AGENTS_BASE/skills/$s"
+      cp -r "$REPO_ROOT/skills/$s" "$AGENTS_BASE/skills/$s"
     done
     for c in "${COMMANDS[@]}"; do
-      cp "$REPO_ROOT/commands/$c" "$HOME/.agents/commands/$c"
+      cp "$REPO_ROOT/commands/$c" "$AGENTS_BASE/commands/$c"
     done
-    echo "==> also installed to ~/.agents/{skills,commands} (cross-tool scope)"
+    echo "$PACK_VERSION" > "$COMPAT_RECEIPT"
+    echo "==> also installed to $AGENTS_BASE/{skills,commands} (cross-tool scope)"
   fi
 }
 
@@ -238,7 +256,11 @@ do_uninstall() {
   for s in "${RETIRED_SKILLS[@]}"; do rm -rf "$ZCODE_SKILLS/$s" 2>/dev/null; done
   for c in "${RETIRED_COMMANDS[@]}"; do rm -f "$ZCODE_COMMANDS/$c" 2>/dev/null; done
   rm -f "$ZCODE_HOOKS/$HOOK_NAME" "$ZCODE_HOOKS/$REMINDER_NAME"
-  rm -rf "$HOME/.agents/skills/$PACK_NAME" 2>/dev/null
+  if [ -f "$COMPAT_RECEIPT" ]; then
+    for s in "${SKILLS[@]}"; do rm -rf "$AGENTS_BASE/skills/$s"; done
+    for c in "${COMMANDS[@]}"; do rm -f "$AGENTS_BASE/commands/$c"; done
+    rm -f "$COMPAT_RECEIPT"
+  fi
   rm -f "$VERSION_RECEIPT" 2>/dev/null
   backup_config
   remove_hook_config

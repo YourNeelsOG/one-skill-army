@@ -25,13 +25,17 @@ _RAILS = (
 )
 
 
-def brief(level="full"):
+def brief(level="ultra"):
     "Return the always-on harness directive for the given intensity level."
-    compression = _COMPRESSION.get(level, _COMPRESSION["full"])
+    compression = _COMPRESSION.get(level, _COMPRESSION["ultra"])
     return "\n".join([
         "ONE SKILL ARMY ACTIVE (level: " + level + ").",
         "",
         _RAILS,
+        "",
+        "Default workflow: read the installed poteto-mode skill and only the "
+        "selected playbook and applicable principle resources. Reuse the "
+        "shared runtime policy within a task; re-read after compaction.",
         "",
         "Overhead compression: " + compression + " NEVER compress the actual "
         "implementation output, code, commands, file paths, numbers, or exact "

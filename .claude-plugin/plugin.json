@@ -1,6 +1,6 @@
 {
   "name": "one-skill-army",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "One Skill Army: minimal code, token discipline, structured workflow, TDD, systematic debugging, verification, anti-hallucination, code-commenting rules, git-safety rails, and cross-session project memory.",
   "author": {
     "name": "One Skill Army contributors"

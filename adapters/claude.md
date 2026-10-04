@@ -59,7 +59,7 @@ The SessionStart hook refreshes the map and injects the orchestrator; the
 UserPromptSubmit hook re-injects the brief every turn, so the disciplines
 survive a mid-session model switch and context compaction.
 
-## Skills (18, routed by the orchestrator)
+## Skills (68, routed by the orchestrator)
 
 The ten core disciplines (`memory`, `minimal-code`, `token-discipline`,
 `workflow`, `test-driven-development`, `systematic-debugging`,
@@ -68,6 +68,12 @@ The ten core disciplines (`memory`, `minimal-code`, `token-discipline`,
 process skills `writing-plans`, `subagent-driven-development`, `code-review`,
 and `using-git-worktrees`. Commands: `/army`, `/army-review`, `/army-audit`,
 `/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/mapit`.
+
+The pack includes 50 adapted pstack skills in addition to these 18 OSA
+disciplines. Each has a command wrapper. Use `/poteto-mode` for task routing
+and `/setup-pstack` for model configuration. Resolve tools and models from the
+current host; missing delegation runs sequentially. OSA rules remain
+authoritative, and optional Bun helpers require separate dependency setup.
 
 ## Platform notes
 

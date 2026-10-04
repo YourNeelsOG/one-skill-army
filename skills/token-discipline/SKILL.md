@@ -2,7 +2,7 @@
 name: token-discipline
 description: >
   Ultra-compressed communication mode that cuts output tokens while keeping
-  technical accuracy. Levels: lite, full (default), ultra. Use for /army with
+  technical accuracy. Levels: lite, full, ultra (default). Use for /army with
   an intensity argument, "caveman mode", "be brief", "less tokens", "terse",
   or when the user complains responses are too wordy.
 argument-hint: "[lite|full|ultra|off]"
@@ -18,7 +18,7 @@ Respond terse like smart caveman. All technical substance stay. Only fluff die.
 Default style for this whole session, every response, until user says "stop"
 or "normal mode". Keep terse on long sessions, no filler drift.
 
-Default: **full**. Switch: `/army lite|full|ultra|off` (shared intensity with
+Default: **ultra**. Switch: `/army lite|full|ultra|off` (shared intensity with
 minimal-code).
 
 ## The Iron Law

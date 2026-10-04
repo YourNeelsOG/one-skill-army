@@ -7,7 +7,7 @@ Set the pack intensity.
 
 User's requested level: $ARGUMENTS
 
-Valid levels, exactly: `lite`, `full` (default), `ultra`, `off`. Nothing
+Valid levels, exactly: `lite`, `full`, `ultra` (default), `off`. Nothing
 else is a level. If $ARGUMENTS is empty, or is not one of these four words
 ("high", "max", "medium", and numbers are NOT levels), do NOT map it to the
 closest level and do NOT set anything: list the four levels in one line and

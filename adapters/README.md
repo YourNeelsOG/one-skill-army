@@ -30,7 +30,7 @@ import line; most other hosts read `AGENTS.md` natively.
   index .` once per project (or `python3 -m osa` from a checkout). The agent
   then reads `.osa/context.md` instead of re-scanning the tree.
 
-The pack is 18 skills (routed by `one-skill-army`) and 8 commands. Beyond the
+The pack is 68 skills (routed by `one-skill-army`) and 58 commands. Beyond the
 ten core disciplines it adds `input-discipline`, `army-commit`, `mapit`, and
 the process skills `writing-plans`, `subagent-driven-development`,
 `code-review`, and `using-git-worktrees`. Hosts with hooks (Claude, Cursor,
@@ -49,3 +49,10 @@ switch; the rest rely on the instruction anchor.
 
 Never dialed by intensity: anti-hallucination, verification, code-commenting,
 git-safety, memory-safety. Those have no off switch.
+
+## Poteto workflows
+
+The 68 skills comprise 18 OSA disciplines and 50 adapted pstack workflows.
+The latter each have a command wrapper. Named subagent prompts ship with the
+skills, so hosts can use generic delegates or sequential execution. Optional
+Bun helpers are separate from the dependency-free Python engine.

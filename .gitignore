@@ -8,6 +8,9 @@ dist/
 .venv/
 venv/
 
+# Optional imported helper dependencies stay local.
+node_modules/
+
 # Secrets and local-only env files (never publish)
 .env
 .env.local

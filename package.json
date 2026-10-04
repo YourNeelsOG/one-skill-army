@@ -1,0 +1,25 @@
+{
+  "name": "@yourneelsog/one-skill-army",
+  "version": "2.2.0",
+  "description": "Project installer and automatic skill workflows for One Skill Army",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "osa": "bin/osa.mjs" },
+  "engines": { "node": ">=18" },
+  "files": [
+    "bin/",
+    "osa/**/*.py",
+    "skills/",
+    "commands/",
+    "hooks/",
+    "scripts/build-osa.py",
+    "scripts/pack-manifest.sh"
+  ],
+  "scripts": {
+    "prepack": "python3 scripts/build-osa.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YourNeelsOG/one-skill-army.git"
+  }
+}

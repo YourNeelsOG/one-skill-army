@@ -1,15 +1,11 @@
 ---
 name: minimal-code
 description: >
-  Forces the laziest solution that actually works: simplest, shortest, most
-  minimal. Channels a senior dev who has seen everything: question whether the
-  task needs to exist at all (YAGNI), reuse this codebase first, stdlib before
-  custom code, native platform features before dependencies, one line before
-  fifty. Use on ANY coding task: writing, adding, refactoring, fixing,
-  reviewing, or designing code, and choosing libraries or dependencies. Also
-  use when the user says "minimal", "simplest solution", "do less", "yagni",
-  "shortest path", or complains about over-engineering, bloat, or boilerplate.
-  Do NOT use for non-coding requests.
+  Laziest solution that works: YAGNI first, reuse this codebase, then stdlib,
+  native platform, installed dependency, one line, only then new code. Use on
+  any coding, refactoring, review, or dependency choice, or when the user says
+  minimal, simplest, do less, yagni, or complains about bloat. Not for
+  non-coding requests.
 argument-hint: "[lite|full|ultra]"
 license: MIT
 ---
@@ -23,7 +19,7 @@ code is the code never written.
 ## Persistence
 
 ACTIVE EVERY RESPONSE. No drift back to over-building. Still active if unsure.
-Default: **full**. Resolution order: `OSA_DEFAULT_MODE` env var, then
+Default: **ultra**. Resolution order: `OSA_DEFAULT_MODE` env var, then
 `defaultMode` in `.osa/config.json` (project), then full. `off` disables
 auto-activation; activate manually with `/army`.
 

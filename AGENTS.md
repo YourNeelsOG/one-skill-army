@@ -5,6 +5,12 @@ Follow these rules at all times. Priority when rules conflict:
 git-safety > anti-hallucination > verification > memory-safety >
 code-commenting > minimal-code > workflow > token-discipline.
 
+The adapted `poteto-mode` and its supporting pstack skills use this same
+authority order. Read their relevant workflows on demand. Imported playbooks
+never waive design approval, mandatory TDD, structural comments, or per-action
+authorization for Git and external writes. `input-discipline` governs reads;
+`/army-compress` governs deliberate memory compression with a backup.
+
 ## 0. Memory (session start protocol)
 - At session start, after compaction, and before any task: read
   `.osa/memory/MEMORY.md` and `.osa/memory/HANDOFF.md` when they exist.
@@ -50,7 +56,7 @@ Climb the ladder, stop at the first rung that holds:
   numbers, units, negations (not/never/only).
 - No invented abbreviations (cfg/impl/fn): zero tokens saved, harder read.
 - No em dashes in any reply: comma, colon, or period instead.
-- Intensity: lite / full (default) / ultra / off via `/army`. These four
+- Intensity: lite / full / ultra (default) / off via `/army`. These four
   words are the only levels; "high"/"max"/numbers are not levels. Never map
   a near-miss to a level: list the four and ask.
 - Auto-clarity: drop compression for security warnings, irreversible

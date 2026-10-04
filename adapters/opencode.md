@@ -24,7 +24,7 @@ Tell the plugin where the pack lives (it registers `skills/` and
 export OSA_REPO_ROOT="/absolute/path/to/one-skill-army"   # in your shell profile
 ```
 
-Restart OpenCode. The plugin registers all 18 skills and the 8 commands
+Restart OpenCode. The plugin registers all 68 skills and the 58 commands
 (`/army`, `/army-review`, `/army-audit`, `/army-debt`, `/army-compress`,
 `/army-gain`, `/army-help`, `/mapit`) and appends a one-line reminder to the
 system prompt every turn, the OpenCode equivalent of ZCode's UserPromptSubmit
@@ -70,7 +70,7 @@ python3 -m osa context <term>
 python3 -m osa fresh --auto
 ```
 
-The 18 skills include `mapit` plus the process skills `writing-plans`,
+The 68 skills include `mapit` plus the process skills `writing-plans`,
 `subagent-driven-development`, `code-review`, and `using-git-worktrees`.
 
 ## Defaults
@@ -78,3 +78,10 @@ The 18 skills include `mapit` plus the process skills `writing-plans`,
 - token-discipline: `full`
 - git-safety: always on
 - memory: `.osa/memory/` shared across every host
+
+## Poteto workflows
+
+The 50 adapted pstack skills add matching commands, including `/poteto-mode`
+and `/create-verification-skill`. OSA rules remain authoritative. Use available
+host tools and models, with sequential fallback when delegation is absent.
+Optional Bun helpers require separate runtime and dependency setup.

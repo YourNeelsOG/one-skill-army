@@ -32,12 +32,23 @@ Codex has no per-turn context-injection hook, so the map does not auto-refresh:
 run `osa fresh --auto` after large edits, and read `.osa/context.md` at the
 start of a task instead of re-scanning the tree.
 
-## Skills (18, routed by the orchestrator)
+## Skills (68, routed by the orchestrator)
 
 Ten core disciplines plus `input-discipline`, `army-commit`, `mapit`, and the
 process skills `writing-plans`, `subagent-driven-development`, `code-review`,
-`using-git-worktrees`. Commands: `/army`, `/army-review`, `/army-audit`,
-`/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/mapit`.
+`using-git-worktrees`. The pack also ships command wrappers for hosts that
+support them.
+
+The pack includes 50 adapted pstack skills in addition to these 18 OSA
+disciplines. In Codex, use `$poteto-mode` for task routing and `$setup-pstack`
+for model configuration. You can also write "use poteto mode" or "configure
+pstack models" in ordinary language. There is no `/pstack` entrypoint.
+
+The OSA orchestrator routes tasks through poteto workflows by default. It
+loads only the selected playbook and relevant references on demand. Resolve
+tools and models from the current host; missing delegation runs sequentially.
+OSA rules remain authoritative, and optional Bun helpers require separate
+dependency setup.
 
 ## Platform notes
 

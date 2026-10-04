@@ -1,265 +1,385 @@
-<p align="center">
-  <strong>One Skill Army</strong>
-</p>
+# One Skill Army
 
-<p align="center">
-  <strong>One skill. Your agent writes less, spends less, forgets nothing, and never bluffs.</strong><br>
-  Four proven ideas, rebuilt as one self-contained pack with its own engine. No external packs required.
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/skills-18-blue" alt="18 skills">
-  <img src="https://img.shields.io/badge/engine-zero_dependencies-brightgreen" alt="zero deps">
-  <img src="https://img.shields.io/badge/tests-188_passing-brightgreen" alt="188 tests">
-  <img src="https://img.shields.io/badge/python-3.8%2B-blue" alt="python 3.8+">
+<p>
+  <img src="https://img.shields.io/badge/skills-68-blue" alt="68 skills">
+  <img src="https://img.shields.io/badge/engine-zero_dependencies-brightgreen" alt="zero dependencies">
+  <img src="https://img.shields.io/badge/python-3.8%2B-blue" alt="Python 3.8+">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT">
 </p>
 
-<p align="center">
-  <a href="#see-it">See it</a> ·
-  <a href="#why">Why</a> ·
-  <a href="#what-you-get">What you get</a> ·
-  <a href="#the-osa-engine">Engine</a> ·
-  <a href="#install">Install</a> ·
-  <a href="#commands">Commands</a> ·
-  <a href="#how-it-compares">Compare</a> ·
-  <a href="#faq">FAQ</a> ·
-  <a href="#contributing">Contribute</a>
-</p>
+One Skill Army (OSA) gives your coding agent a disciplined workflow, a token
+optimizer, project memory, and a dependency-free project graph. Version 2.2.0
+ships 68 skills, including all 50 adapted pstack skills, and works in Codex,
+Claude Code, Grok, and ZCode from one project install.
 
----
+After one install command:
 
-## See it
+- Every new chat in the project starts with OSA active. You never type
+  `/setup-pstack` or `/poteto-mode` first.
+- The model reads your request and picks the matching skills on its own.
+- The poteto workflow and the token optimizer run by default at level `ultra`.
+- Slash entries stay available for when you want to pick a skill yourself.
 
-**Getting oriented in a project:**
+## Contents
 
-<table>
-<tr>
-<th width="50%">Plain agent</th>
-<th width="50%">With One Skill Army</th>
-</tr>
-<tr>
-<td valign="top">
+- [Quick start](#quick-start)
+- [Install pipeline](#install-pipeline)
+- [What the installer writes](#what-the-installer-writes)
+- [Using it in each host](#using-it-in-each-host)
+- [How a chat runs](#how-a-chat-runs)
+- [Automatic skill selection](#automatic-skill-selection)
+- [Change workflow](#change-workflow)
+- [Token optimization](#token-optimization)
+- [Project graph engine](#project-graph-engine)
+- [Safety and memory](#safety-and-memory)
+- [Other install routes](#other-install-routes)
+- [Contribute and verify](#contribute-and-verify)
+- [License and upstream source](#license-and-upstream-source)
 
-Greps across the tree, opens dozens of files, reads ~150,000 tokens, and still asks where things live.
+## Quick start
 
-</td>
-<td valign="top">
+Prerequisites: Node.js 18 or later with npm, and Python 3.8 or later. Nothing
+else is downloaded at run time.
 
-Reads one prebuilt map of ~700 tokens and already knows the entrypoints, the hubs, and where each thing lives. **Measured: 99% fewer tokens to get oriented.**
-
-</td>
-</tr>
-</table>
-
-**Answering a question:**
-
-<table>
-<tr>
-<th width="50%">Plain agent</th>
-<th width="50%">With One Skill Army</th>
-</tr>
-<tr>
-<td valign="top">
-
-> The re-render is likely because a new object reference is created each render; React's shallow comparison then treats it as changed and re-renders. Consider useMemo.
-
-Writes 180 new lines. Says "this should work."
-
-</td>
-<td valign="top">
-
-> New object ref each render. Inline object prop = new ref = re-render. Wrap in `useMemo`.
-
-Reuses what exists, writes 30 lines, runs the test, shows the proof.
-
-</td>
-</tr>
-</table>
-
-## Why
-
-Your AI coding assistant is capable but has bad default habits: it writes too much code, wastes words, re-learns your project every session, and sometimes invents APIs that do not exist. One Skill Army is a set of standing rules plus one small tool that fix those habits automatically. You install it once; the good behavior comes free on every task after that.
-
-It brings together the four best ideas in agent tooling and reimplements each one natively, so it depends on none of them:
-
-| Idea | What it does here |
-|---|---|
-| write the least code | reuse before build, the laziest solution that works |
-| use fewer tokens | compress the thinking and context overhead, never the actual output |
-| work with discipline | brainstorm, plan, test-first, debug from root cause, verify before "done" |
-| remember the project | a deterministic graph so the agent reads a small map, not the whole tree |
-
-## What you get
-
-- **Better code.** A reuse ladder runs before any new code: does it need to exist, is it already here, does the standard library or platform do it, can it be one line. Bug fixes go to the root cause, not a patch.
-- **Fewer tokens.** Terse working notes and a small context map, while code, commands, numbers, and error strings stay exact. Overhead shrinks; the answer never does.
-- **Trustworthy output.** No claim about code it has not read this session, no invented functions, no "done" without fresh test evidence.
-- **Project memory.** The `osa` engine maps the codebase once so the agent stops rediscovering it, and stays oriented across sessions and model switches.
-- **Hard safety rails, always on.** Never force push, never open a PR or turn on an AI code reviewer without asking, no em dashes in code, structural comments for the next developer.
-
-### The disciplines
-
-`memory` · `minimal-code` · `token-discipline` · `workflow` · `test-driven-development` · `systematic-debugging` · `verification-before-completion` · `anti-hallucination` · `code-commenting` · `git-safety` · `input-discipline` · `writing-plans` · `subagent-driven-development` · `code-review` · `using-git-worktrees` · `army-commit` · `mapit`
-
-They are composable, and [`skills/one-skill-army/SKILL.md`](skills/one-skill-army/SKILL.md) is the single orchestrator that routes to them. One file is enough for an agent to follow the whole system.
-
-Priority when they conflict, safety first: **git-safety > anti-hallucination > verification > memory > code-commenting > minimal-code > workflow > token-discipline.** A safety rail is never traded for speed.
-
-## The osa engine
-
-`osa` is the one piece of real code: pure Python standard library, zero external dependencies. It builds a deterministic graph of any project and serves the smallest useful slice, with no LLM in the loop, so it is free, instant, and never invents a connection.
-
-It ships as a single bundled file, `osa.pyz`, inside the skills, so it runs anywhere with no install and no path setup: `python3 ~/.claude/skills/one-skill-army/osa.pyz <command>` (or `python3 -m osa <command>` from a repo checkout). The commands below use the short `osa` alias from the install step.
+Run this inside the project you want to equip:
 
 ```bash
-osa index .                      # full build: graph.json, context.md, GRAPH_REPORT.md, graph.html
-osa update .                     # incremental: re-parse only changed files (--force for all)
-osa query "<question>"           # relevant subgraph for a plain-language question
-osa explain <node>               # a node's relations, grouped, EXTRACTED or INFERRED
-osa path <a> <b>                 # shortest path, with the relation of every hop
-osa affected <node>              # what depends on it: reverse imports, calls, inherits
-osa god-nodes                    # most connected nodes
-osa context <term>               # substring slice (kept for hooks and scripts)
-osa export html                  # self-contained force-directed view (or graphml)
-osa measure                      # how many tokens the map saves vs reading the tree
-osa brief                        # the always-on discipline directive the hooks inject
+npx --allow-git=root github:YourNeelsOG/one-skill-army install .
 ```
 
-It parses Python (real AST), JS/TS, Go, Rust, Java, SQL, shell, JSON/YAML/TOML and Markdown. Every edge is labelled `EXTRACTED` (read straight from the syntax) or `INFERRED` (matched by a heuristic, with the reason recorded), so you can tell a fact from a guess; `GRAPH_REPORT.md` lists every inferred edge for review. Add `--json` to any query command for machine output.
-
-The map carries real analysis with no model call: most-central files (betweenness), clusters (community detection), surprising cross-module links, and questions the graph can answer. On this repo `osa measure` reports about 99% fewer tokens to get oriented.
-
-## Install
-
-Installing means putting these files where your AI tool already looks. Two pieces:
-
-1. **The skills** (the instruction files the AI reads) go in your tool's skills folder, once per machine.
-2. **The rules file and the project map** go in each project you work on.
-
-### Start here (Claude Code)
+Then check the result:
 
 ```bash
-# 1. Install the skills (osa engine ships inside them). The installer prunes
-#    old/renamed items and records the version, so re-running it upgrades:
-scripts/install.sh claude          # or: gemini, agents, or --dir <path>
-
-# 2. Optional: a short alias for the shipped engine
-alias osa='python3 ~/.claude/skills/one-skill-army/osa.pyz'
-
-# 3. In each project, build the map so the agent knows the codebase
-osa index .
+npx --allow-git=root github:YourNeelsOG/one-skill-army doctor .
 ```
 
-(A plain `cp -r skills/* ~/.claude/skills/` also works, but cannot prune
-renamed items on later upgrades; the installer can.)
+Start a new agent chat in that project and describe the work in plain words:
 
-To auto-load the rules at the start of every session, add a `CLAUDE.md` at your project root containing one line, `@AGENTS.md`, and copy this repo's [`AGENTS.md`](AGENTS.md) next to it. Claude reads `CLAUDE.md`, not `AGENTS.md`, so the one-line import points it at the full rules. Prefer one click? Install this repo as a Claude plugin; that also wires the session hook, which re-loads the rules every turn and keeps them alive across a model switch.
+```text
+Explain how authentication works in this project.
+Fix the failing parser test.
+Design a migration for this module before changing the code.
+```
 
-### Other tools
+That is the whole setup. The GitHub route serves whatever is on the `main`
+branch, so it picks up this version once it is pushed there.
 
-Same rules, different folder and filename. One short note per tool lives in [`adapters/`](adapters/README.md):
+Why `--allow-git=root`: since npm 12, npm refuses to fetch packages from git by
+default. The flag allows only the package you named, not git dependencies
+inside it (OSA has none). Once OSA is on the npm registry the flag goes away.
 
-| Tool | Install | Rules file it reads |
+To keep a short `osa` command on your machine, install it globally once:
+
+```bash
+npm install -g --allow-git=root github:YourNeelsOG/one-skill-army
+osa install /path/to/project
+osa doctor /path/to/project
+```
+
+Install only some hosts, or pick a different default level:
+
+```bash
+osa install . --hosts codex claude
+osa install . --level full
+```
+
+Re-running `osa install .` upgrades a project in place and keeps your own
+edits outside the OSA sections. Start a new chat afterwards so the host reloads
+its instructions and skill catalog.
+
+## Install pipeline
+
+```mermaid
+flowchart TD
+    A["npx --allow-git=root github:YourNeelsOG/one-skill-army install ."] --> B[Node launcher bin/osa.mjs]
+    B --> C[Bundled Python installer osa/install.py]
+    C --> V{Validate first}
+    V -->|conflict, symlink, corrupt config| X[Stop with an error, nothing written]
+    V -->|clean| S[Stage full payload in a temporary directory]
+    S --> P[Swap into .osa/pack with an ownership receipt]
+    P --> L[Link skills and commands for each host]
+    P --> AN[Write managed section in AGENTS.md and CLAUDE.md]
+    P --> CF[Set defaultMode in .osa/config.json]
+    L --> D[osa doctor checks hashes, links, anchors, config]
+    AN --> D
+    CF --> D
+    D --> N[New chat: OSA active automatically]
+```
+
+The installer validates every target before it writes anything. It refuses to
+replace files it does not own, follows no symlinks out of the project, and
+stages the payload before swapping it in, so a failed copy leaves the previous
+install intact.
+
+## What the installer writes
+
+```text
+your-project/
+  AGENTS.md              managed OSA section appended, your text kept
+  CLAUDE.md              same managed section for Claude Code
+  .osa/
+    config.json          defaultMode (ultra unless you choose another)
+    pack/                skills, commands, hooks, ownership receipt
+  .agents/skills/        links for Codex
+  .claude/skills/        links for Claude Code
+  .claude/commands/      links for the army-* commands
+  .grok/skills/          links for Grok
+  .grok/commands/        links for the army-* commands
+  .zcode/skills/         links for ZCode
+  .zcode/commands/       links for every command wrapper
+```
+
+| Host | Instruction file | Skills | Command wrappers |
+|---|---|---|---|
+| Codex | `AGENTS.md` | `.agents/skills` | none, Codex uses `$skill` and `/skills` |
+| Claude Code | `CLAUDE.md` | `.claude/skills` | `army-*` only |
+| Grok | `AGENTS.md` | `.grok/skills` | `army-*` only |
+| ZCode | `AGENTS.md` | `.zcode/skills` | all 58 |
+
+Claude Code and Grok already list every skill as a slash entry, so a wrapper
+command with the same name would only duplicate it and cost catalog tokens on
+every session. Those hosts get the seven `army-*` commands that have no
+matching skill. ZCode keeps every wrapper.
+
+Nothing is written outside the project. No user-wide host config is changed.
+
+## Using it in each host
+
+Automatic selection is the normal path: just describe the task. Use these when
+you want a specific skill.
+
+| Host | Pick a skill yourself | Example |
 |---|---|---|
-| ZCode | `scripts/install-zcode.sh` (does everything) | `AGENTS.md` |
-| Claude Code | `~/.claude/skills` or plugin | `CLAUDE.md` (imports `AGENTS.md`) |
-| Codex CLI | `~/.codex` or plugin | `AGENTS.md` |
-| Cursor | `.cursor-plugin` or rules files | `.cursor/rules/*.mdc` |
-| Gemini CLI | `~/.gemini` | `GEMINI.md` |
-| Grok | `grok plugin install` (enable in `config.toml`) | `AGENTS.md` |
-| OpenCode | `.opencode` plugin | `AGENTS.md` |
+| Claude Code | `/skill-name` | `/how explain the auth flow` |
+| Grok | `/skill-name` | `/why is this cache here` |
+| ZCode | `/command-name` or `$skill-name` | `/architect compare two designs` |
+| Codex | `$skill-name` or the `/skills` menu | `$tdd add input validation` |
 
-### Verify
+Useful entries. The `army-*` entries are commands, so Codex users ask for them in
+plain words instead:
+
+| Entry | What it does |
+|---|---|
+| `army` | Set the token level: `lite`, `full`, `ultra`, or `off` |
+| `army-help` | One-screen reference of levels, skills, and commands |
+| `army-review` | Review the current diff for bloat, invented symbols, safety regressions |
+| `army-audit` | Whole-repo audit for reinvented wheels and dead code |
+| `mapit` | Build or query the project graph |
+| `poteto-mode` | Force the full poteto router for a large task |
+| `setup-pstack` | Optional: assign models to workflow roles |
+
+## How a chat runs
+
+```mermaid
+sequenceDiagram
+    participant U as You
+    participant H as Host (Codex, Claude, Grok, ZCode)
+    participant A as AGENTS.md / CLAUDE.md
+    participant O as OSA orchestrator
+    participant P as poteto-mode router
+    participant S as Selected skill
+    U->>H: Plain request
+    H->>A: Load project instructions
+    A->>O: Resolve level, activate OSA
+    O->>O: Recall .osa/memory, read .osa/context.md
+    O->>P: Route request
+    P->>S: Load only the matching playbook and principles
+    S->>H: Work under approval, TDD, and verification rails
+    H->>U: Terse answer with evidence
+```
+
+Routing runs on instructions the host already reads. There is no background
+service and nothing intercepts model calls.
+
+## Automatic skill selection
+
+The model maps your words to a workflow. Examples:
+
+| Your request | Workflow it selects |
+|---|---|
+| "How does X work", "where should this live" | `how`, `teach` |
+| "Why is it built like this" | `why` |
+| "Fix this bug", failing test | root-cause debugging, then failing-test-first fix |
+| "Add this feature" | design, approval, TDD, verification |
+| "Clean this up without changing behavior" | refactor with characterization tests |
+| "Which approach is better" | `architect` or `arena` |
+| "Split this into parallel work" | `swarm`, when the host supports delegation |
+| "Challenge this decision" | `interrogate` |
+| "Make checks for this app" | `create-verification-skill` |
+| "Where is X", "what depends on Y" | `mapit` graph query |
+| "Write a commit" | `army-commit` |
+
+Only the selected playbook and the principles it needs are loaded. The other
+skills cost only their one-line catalog descriptions.
+
+## Change workflow
+
+```mermaid
+flowchart TD
+    A[Your request] --> B[Recall memory and project map]
+    B --> C{Classify: spike, bounded, or architectural}
+    C -->|question only| R[Read sources, answer with evidence]
+    C -->|change| G[Present design]
+    G --> H{You approve?}
+    H -->|no| G
+    H -->|yes| T[Write a failing behavioral test]
+    T --> I[Smallest change that passes]
+    I --> K[Run checks, inspect the diff]
+    K --> L[Report evidence, write handoff]
+    L --> M{Commit, push, or publish asked for?}
+    M -->|yes| Q[Show exact action, wait for a separate yes]
+    M -->|no| O[Work stays local]
+```
+
+## Token optimization
+
+The token optimizer compresses the agent's prose and working notes. It never
+compresses code, commands, file paths, numbers, or exact error strings, and it
+switches back to plain wording for security warnings and irreversible steps.
+
+| Level | Effect |
+|---|---|
+| `lite` | Trims filler and hedging, keeps full sentences |
+| `full` | Terse fragments, no pleasantries or narration |
+| `ultra` (default) | Minimum words for prose and status |
+| `off` | OSA does not auto-activate in this project |
+
+The level is resolved in this order:
+
+```mermaid
+flowchart LR
+    E[OSA_DEFAULT_MODE env var] -->|unset| C[.osa/config.json defaultMode]
+    C -->|unset| D[Installed default: ultra]
+    E -->|set| R[Resolved level]
+    C -->|set| R
+    D --> R
+    R -->|off| N[No automatic activation]
+    R -->|lite, full, ultra| Y[OSA active at that level]
+```
+
+Change it any time with `army` on hosts that list it, by asking in plain
+words, or with `osa install . --level <level>`. Only these four words are
+levels. Anything else, such as "high" or a number, is rejected rather than
+guessed.
+
+Input is optimized too: the agent reads the prebuilt project map before
+searching, reads file ranges instead of whole files, and loads one playbook
+instead of all of them. OSA makes no promise about billed-token savings for
+your project. The `osa measure` command gives a rough character-based estimate,
+not a provider bill.
+
+## Project graph engine
+
+The engine is pure Python standard library: no package, no API key, no model
+call. It ships inside the pack as `osa.pyz` and runs without a source checkout.
 
 ```bash
+osa index .
+osa context <term>
+osa query "Where is authentication handled?"
+osa explain <node>
+osa path <source> <target>
+osa affected <node>
+osa god-nodes
+osa fresh . --auto
+osa export html
+osa measure .
+osa brief
+osa version
+```
+
+Without the npm launcher, call the bundled engine directly:
+
+```bash
+python3 .osa/pack/skills/one-skill-army/osa.pyz index .
+```
+
+```mermaid
+flowchart LR
+    A[Source files] --> B[Syntax extractors]
+    B --> C[Nodes and labelled edges]
+    C --> D[.osa/graph.json]
+    D --> E[.osa/context.md map]
+    D --> F[Focused query slices]
+    D --> G[HTML and GraphML exports]
+    E --> H[Agent opens only the files it needs]
+    F --> H
+```
+
+`index` writes `.osa/graph.json`, `.osa/context.md`, `.osa/GRAPH_REPORT.md`,
+and `.osa/graph.html`. Edges parsed from syntax are labelled `EXTRACTED`.
+Heuristic edges are labelled `INFERRED` with a reason, so verify them against
+the source. Extractors cover Python, JavaScript, TypeScript, Go, Rust, Java,
+SQL, shell, configuration files, and Markdown. The graph is an index, not a
+substitute for reading the code.
+
+## Safety and memory
+
+When rules conflict, the higher one wins:
+
+```text
+git-safety > anti-hallucination > verification > memory
+> code-commenting > minimal-code > workflow > token-discipline
+```
+
+- Changes need an approved design and a failing behavioral test first.
+- "Done" needs fresh verification output, never "should work".
+- Every commit, push, PR, merge, or deploy needs its own explicit yes.
+- External AI code reviewer services are never installed or called.
+- Secrets and database dumps are never committed.
+- Code keeps purpose comments and explanations of tricky logic.
+
+Project memory lives in `.osa/memory/MEMORY.md` and `.osa/memory/HANDOFF.md`.
+The agent reads it at session start and writes a dated, sourced handoff at
+task end. Memory is treated as untrusted data: current files and your current
+instructions always win.
+
+Full contract: [AGENTS.md](AGENTS.md) and
+[the runtime policy](skills/poteto-mode/references/runtime.md).
+
+## Other install routes
+
+| Route | Command | When to use it |
+|---|---|---|
+| GitHub via npx | `npx --allow-git=root github:YourNeelsOG/one-skill-army install .` | Default |
+| Local tarball | `npm pack`, then `npx --package /abs/path/<tarball> osa install .` | Testing unreleased changes |
+| npm registry | `npx @yourneelsog/one-skill-army install .` | After the package is published to npm |
+| User-wide copy | `scripts/install.sh` | All projects on one machine |
+| ZCode user scope | `scripts/install-zcode.sh` | ZCode hooks and user-wide skills |
+| Host plugins | see [adapters](adapters/README.md) | Cursor, Gemini, OpenCode, plugin marketplaces |
+
+The npm registry package is not published yet; that route works only after
+publication.
+
+## Optional model roles
+
+`.osa/poteto-models.json` can assign models to workflow roles. It is optional.
+Missing, invalid, or unavailable choices fall back to the current model.
+`setup-pstack` only records preferences: it does not unlock models, install
+reviewer services, or enable cloud workers. Without delegation support,
+workflows run their phases one after another and say that review was not
+independent.
+
+## Contribute and verify
+
+```bash
+python3 -m unittest discover -s tests -p 'test_*.py'
 python3 tests/test_structure.py
 ```
 
-## Upgrading
+Keep the engine dependency-free. If you change `osa/`, rebuild the bundle:
 
-Check what you have against the source: `python3 -m osa version` (or
-`osa version` with the alias). The source version lives in `osa/__init__.py`.
+```bash
+python3 scripts/build-osa.py
+```
 
-- **ZCode**: re-run the installer. It is the upgrade: it prunes skills and
-  commands retired in past versions (so a rename like `osa-map` to `mapit`
-  leaves no orphan), copies the current set, and restamps the version.
-  ```bash
-  scripts/install-zcode.sh --upgrade     # or just re-run: scripts/install-zcode.sh
-  scripts/install-zcode.sh --doctor      # shows installed vs source version + any drift
-  ```
-- **Claude Code, Gemini, or any copy-based host**: run the generic installer.
-  Like the ZCode one, it prunes retired items, copies the current set (osa
-  engine included), and stamps the version, so re-running it is the upgrade.
-  ```bash
-  scripts/install.sh claude              # or: gemini, agents, or --dir <path>
-  scripts/install.sh claude --doctor     # installed vs source version
-  ```
-- **Plugin installs** (Claude Code, Cursor, Codex, Grok, OpenCode): if you
-  installed through the host's plugin manager instead, upgrade there (refresh
-  the marketplace, then reinstall or `plugin update`). The manifests carry the
-  version, so the host sees the new release.
-- **Raw copy** (no installer): `cp -r skills/*` cannot prune, so remove renamed
-  items by hand, e.g. `rm -rf ~/.claude/skills/osa-map` (renamed to mapit).
+For package changes, run `npm pack` and exercise the tarball from a disposable
+project outside this checkout, so checks never touch live host settings.
 
-After any upgrade, start a new session so the pack reloads, and run
-`python3 -m osa index .` to rebuild the map with the latest engine.
+## License and upstream source
 
-## Commands
-
-Slash commands (once installed in your tool):
-
-| Command | What it does |
-|---|---|
-| `/army [lite\|full\|ultra\|off]` | set intensity: prose compression and ladder strictness |
-| `/army-review` | review a diff: over-engineering, invented symbols, safety regressions |
-| `/army-audit` | whole-repo audit: reinvented wheels, dead code, dependency sprawl |
-| `/army-debt` | harvest `osa:` shortcut markers into a ledger so deferrals do not rot |
-| `/army-gain` | measured-impact scoreboard, honest counted numbers only |
-| `/army-compress` | compress a memory or instruction file to terse, with a backup |
-| `/army-help` | reference card: levels, skills, commands |
-| `/mapit [update\|status\|query\|explain\|path\|affected]` | bring the project map up to date, or ask it a question, via `osa` |
-
-## How it compares
-
-The four ideas that inspired this pack are excellent. Here is the honest picture of where One Skill Army stands against each.
-
-| Against | We match or beat | They still lead |
-|---|---|---|
-| minimal-code idea | same reuse ladder, plus the review/audit/debt commands | published head-to-head benchmark numbers |
-| token idea | overhead compression with the output kept exact | a wire-level proxy and cloud spend analytics |
-| workflow idea | the high-value process skills, native | a larger library of process skills |
-| project-graph idea | deterministic graph, analysis, exports, free and instant | LLM-inferred edges and PDF, image, and video ingest |
-
-Our deliberate trade: everything the graph does is deterministic, dependency-free, and costs no tokens to build. The features we do not match all require an LLM in the loop or an external service, which is exactly what "self-contained" rules out.
-
-## FAQ
-
-**Do I need an API key or an internet connection?** No. The engine is pure standard library and runs offline.
-
-**Will it slow me down?** The map is built once and updated incrementally. Reading a small map is faster and cheaper than scanning the repo every session.
-
-**Does it change my code style or my tools?** It adds standing rules and one map file per project (`.osa/`). It does not touch your code unless you ask it to.
-
-**What if I only copy the skills, not the whole repo?** Everything works. The engine ships bundled as `osa.pyz` inside the skills, so `python3 ~/.claude/skills/one-skill-army/osa.pyz` runs with no repo checkout and no path setup.
-
-**Can I turn the terse mode off?** Yes: `/army off`, or set the level to `lite`, `full`, or `ultra`. Safety rails never turn off.
-
-## Philosophy
-
-Most agent code is too long, most agent prose is too wordy, most agent workflows skip straight to typing, and most agents forget your project overnight. One Skill Army inverts all four: climb down the ladder before building, squeeze the words but never the facts, plan before typing, and keep a map so you never start blind.
-
-## Contributing
-
-Issues and pull requests are welcome; this is an open project. Before opening a PR:
-
-1. Run the suite: `python3 tests/test_structure.py` plus every `tests/test_*.py` (all must pass).
-2. Keep the engine pure standard library, zero dependencies; that constraint is the point.
-3. Match the pack conventions: no em dashes anywhere, structural comments over noise, and the laziest solution that works.
-4. If you touch `osa/`, rebuild the bundle with `python3 scripts/build-osa.py` so the shipped `osa.pyz` does not drift.
-
-By contributing you agree your contributions are licensed under the repo's MIT license.
-
-## License
-
-MIT
+MIT licensed. The pstack adaptation includes all 50 skills from upstream
+version 0.15.9 at revision `e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a`. Imported
+skill directories keep their MIT attribution to Lauren Tan. The inventory and
+source hashes are in
+[`provenance.json`](skills/poteto-mode/provenance.json).

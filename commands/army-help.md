@@ -41,6 +41,13 @@ list these four and ask.
 | army-commit | "write a commit" |
 | mapit | Project structure/dependency questions: query the osa map first |
 
+The pack also includes 50 adapted pstack skills, each with a matching command.
+Use `/poteto-mode` to select a playbook, `/setup-pstack` to configure available
+models, `/how` and `/why` to investigate, `/architect` and `/arena` to explore
+designs, and `/swarm` for independent work. `/create-verification-skill` and
+`/maintain-verification-skill` build and maintain runtime proof. OSA rules apply
+to every workflow, including `/tdd`, `/no-comments`, and shipping.
+
 ## Engine (osa)
 
 The native project-memory tool. Deterministic, zero-dependency, no LLM. Ships

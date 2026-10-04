@@ -1,13 +1,10 @@
 ---
 name: mapit
 description: >
-  Persistent project-intelligence graph for the One Skill Army pack. The native
-  osa engine auto-builds a deterministic graph from the code (no manual work,
-  no external package); the agent reads the prebuilt context instead of
-  re-discovering the project. Optional manual edges capture relationships the
-  parser cannot see, and osa-graph-stale.py renders the HTML view. Use when
-  starting work in an indexed project, when asked about project structure or
-  dependencies, or when the user says mapit or graph the project.
+  Native osa project graph: read the prebuilt .osa/context.md and run
+  osa context <term> instead of rescanning the repo. Use when starting in an
+  indexed project, for structure or dependency questions, or when the user
+  says mapit or graph the project.
 ---
 
 # mapit - persistent project intelligence

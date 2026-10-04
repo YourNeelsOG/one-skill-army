@@ -24,7 +24,7 @@ to `mapit`), and `--doctor` reports drift so you know when a re-sync is due.
 
 | Resource | User scope | Notes |
 |---|---|---|
-| Skills | `~/.zcode/skills/<name>/SKILL.md` | 18 skills, every workspace |
+| Skills | `~/.zcode/skills/<name>/SKILL.md` | 68 skills, every workspace |
 | Commands | `~/.zcode/commands/<name>.md` | `/army`, `/army-review`, `/army-audit`, `/army-debt`, `/army-gain`, `/army-compress`, `/army-help`, `/mapit` |
 | Engine | `~/.zcode/skills/one-skill-army/osa.pyz` | the bundled map engine, runs standalone |
 | Hook script | `~/.zcode/hooks/one-skill-army-session-start` | stable path; survives repo moves |
@@ -109,3 +109,10 @@ enabled automatically; no config edit needed.
 - token-discipline: `full`
 - git-safety: always on (hook can be paired with a PreToolUse force-push blocker)
 - memory: `.osa/memory/` shared across every host and agent
+
+## Poteto workflows
+
+The 50 adapted pstack skills add matching commands, including `/poteto-mode`
+and `/create-verification-skill`. OSA rules remain authoritative. Use available
+host tools and models, with sequential fallback when delegation is absent.
+Optional Bun helpers require separate runtime and dependency setup.

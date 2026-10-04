@@ -12,12 +12,14 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const REMINDER =
   'One Skill Army active: ladder before code (does it need to exist? can it be shorter and still do the same work?), terse prose (never terse facts), read the smallest thing that answers, verify before claiming done, no em dashes, git-safety rails hold. Levels: lite/full/ultra/off only.';
 
+// Decode the module URL before resolving paths containing spaces or Unicode.
 function repoRoot() {
-  return process.env.OSA_REPO_ROOT || path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
+  return process.env.OSA_REPO_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 }
 
 function readMode() {
@@ -29,7 +31,7 @@ function readMode() {
     const cfg = JSON.parse(fs.readFileSync(path.join(process.cwd(), '.osa', 'config.json'), 'utf8'));
     if (cfg && typeof cfg.defaultMode === 'string') return cfg.defaultMode.trim().toLowerCase();
   } catch (e) {}
-  return 'full';
+  return 'ultra';
 }
 
 function parseCommandFile(file) {
@@ -57,7 +59,7 @@ export default async () => {
           if (parsed) config.command[path.basename(f, '.md')] = parsed;
         }
       } catch (e) {}
-      // Register the skills directory so OpenCode auto-discovers all 13.
+      // Register the complete installed skills directory.
       try {
         const skillsDir = path.join(root, 'skills');
         if (fs.existsSync(skillsDir)) {

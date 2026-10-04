@@ -1,6 +1,8 @@
 """Command-line entry point for the One Skill Army engine.
 
 Subcommands (run `osa <command> -h` for options):
+  install [path]            install project skills and automatic routing
+  doctor [path]             verify the project installation
   index [path]              full build: .osa/graph.json, context.md, graph.html
   update [path]             incremental build: re-parse only changed files
   query "<question>"        relevant subgraph for a plain-language question
@@ -150,6 +152,38 @@ def _cmd_version(args):
     return 0
 
 
+def _cmd_install(args):
+    "Install project-owned resources and report boundary failures clearly."
+    from .install import install_project
+    try:
+        receipt = install_project(args.path, Path(__file__).resolve().parent.parent,
+                                  hosts=args.hosts, level=args.level)
+    except (OSError, ValueError) as error:
+        print("osa install: " + str(error))
+        return 1
+    print("osa install: " + str(receipt["skill_count"]) + " skills installed in "
+          + str(Path(args.path).resolve()))
+    print("Automatic poteto routing active; token optimization: " + receipt["level"]
+          + ". Start a new host session. No model setup is required.")
+    return 0
+
+
+def _cmd_doctor(args):
+    "Check the installed payload and discovery entries without mutating them."
+    from .install import doctor_project
+    try:
+        result = doctor_project(args.path)
+    except (OSError, ValueError) as error:
+        print("osa doctor: " + str(error))
+        return 1
+    if result["ok"]:
+        print("osa doctor: project installation is complete.")
+        return 0
+    for issue in result["issues"]:
+        print("osa doctor: " + issue)
+    return 1
+
+
 def _cmd_hook(args):
     if args.event == "session-start":
         print(hook_session_start(args.path, level=args.level))
@@ -227,6 +261,18 @@ def main(argv=None):
                                      description="One Skill Army engine")
     sub = parser.add_subparsers(dest="command", required=True)
 
+    p_install = sub.add_parser("install", help="install OSA into a project")
+    p_install.add_argument("path", nargs="?", default=".")
+    p_install.add_argument("--hosts", nargs="+", default=["codex", "claude", "grok", "zcode"],
+                           choices=["codex", "claude", "grok", "zcode"])
+    p_install.add_argument("--level", choices=["lite", "full", "ultra", "off"], default=None,
+                           help="override the project's token optimization level")
+    p_install.set_defaults(func=_cmd_install)
+
+    p_doctor = sub.add_parser("doctor", help="verify an OSA project installation")
+    p_doctor.add_argument("path", nargs="?", default=".")
+    p_doctor.set_defaults(func=_cmd_doctor)
+
     p_index = sub.add_parser("index", help="build the project graph")
     p_index.add_argument("path", nargs="?", default=".")
     p_index.add_argument("--no-html", "--no-viz", dest="no_html",
@@ -283,14 +329,14 @@ def main(argv=None):
     p_fresh.set_defaults(func=_cmd_fresh)
 
     p_brief = sub.add_parser("brief", help="print the harness directive")
-    p_brief.add_argument("--level", default="full",
+    p_brief.add_argument("--level", default="ultra",
                          choices=["lite", "full", "ultra"])
     p_brief.set_defaults(func=_cmd_brief)
 
     p_hook = sub.add_parser("hook", help="emit harness content for a host hook")
     p_hook.add_argument("event", choices=["session-start", "prompt"])
     p_hook.add_argument("--path", default=".")
-    p_hook.add_argument("--level", default="full",
+    p_hook.add_argument("--level", default="ultra",
                         choices=["lite", "full", "ultra"])
     p_hook.set_defaults(func=_cmd_hook)
 

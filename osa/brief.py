@@ -41,6 +41,10 @@ def brief(level="ultra"):
         "implementation output, code, commands, file paths, numbers, or exact "
         "error strings; compress the overhead, not the answer.",
         "",
+        "Context: when the session reaches about 40% of the context window, "
+        "update the handoff file, then compact the session with the host "
+        "action (/compact); the memory skill holds the protocol.",
+        "",
         "Project context is prebuilt. Read .osa/context.md first and query it "
         "(osa context <term>) instead of scanning the repository; the graph "
         "already knows where things live.",

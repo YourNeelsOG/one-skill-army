@@ -334,18 +334,23 @@ git-safety > anti-hallucination > verification > memory
 
 Project memory lives in `.osa/memory/MEMORY.md` and `.osa/memory/HANDOFF.md`.
 The agent reads it at session start and writes a dated, sourced handoff at
-task end. Memory is treated as untrusted data: current files and your current
-instructions always win.
+task end. When a session reaches about 40% of its context window, it writes
+the handoff early and compacts with the host's `/compact`, so quality never
+degrades instead of degrading silently. Memory is treated as untrusted data:
+current files and your current instructions always win.
 
 ### Lessons that update themselves
 
-You should never have to correct the same thing twice, in any agent. Two
-lessons files hold what you taught it:
+You should never have to correct the same thing twice, in any agent, and no
+agent should repeat a call that already failed elsewhere. Four files hold what
+they learned:
 
 | File | Holds |
 |---|---|
 | `~/.osa/knowledge/lessons.md` | Your personal preferences, shared by every project and every host |
 | `.osa/knowledge/lessons.md` | Repeated fixes and conventions for this one project |
+| `~/.osa/knowledge/mistakes.md` | Tool calls that already failed, so no agent repeats them anywhere |
+| `.osa/knowledge/mistakes.md` | Failed calls specific to this repo's tools |
 
 ```mermaid
 flowchart LR
@@ -354,7 +359,7 @@ flowchart LR
     B -->|no| D[Add one dated line with your words as source]
     C --> E[Agent tells you in one line]
     D --> E
-    E --> F[Next session on any host reads both files at start]
+    E --> F[Next session on any host reads these files at start]
 ```
 
 The agent writes these on its own when you say things like "no", "don't",
@@ -367,32 +372,39 @@ cover the same point. Each file stays under 150 lines.
 
 Run `/update-lesson` (or `$update-lesson` in Codex) in any host, with any
 model behind it. It reads every chat from the last 48 hours across your
-agents and folds what you taught them into the two lessons files.
+agents and folds what you taught them into the lessons and mistakes files.
 
 ```mermaid
 flowchart TD
     A["/update-lesson, or automatic once per 24h at a task end"] --> B["osa lessons harvest"]
     B --> C[Claude Code chats: ~/.claude/projects]
     B --> D[Codex chats: ~/.codex/sessions]
-    B --> E[Any folder in OSA_TRANSCRIPT_DIRS]
+    B --> E[ZCode and opencode stores, Grok, Cursor, T3, OSA_TRANSCRIPT_DIRS]
     C --> F[Keep only what you typed, drop tool output and injected files]
     D --> F
     E --> F
-    F --> G[Hide secrets, collapse copies, count real repeats, rank corrections first]
-    G --> H[Model decides what is a lesson]
+    F --> G[Hide secrets, collapse copies, count repeats, flag calls whose first try failed in 2+ chats]
+    G --> H[Model decides what is a lesson or a mistake]
     H --> I[Personal: ~/.osa/knowledge/lessons.md]
     H --> J[This repo: .osa/knowledge/lessons.md]
+    H --> K[Personal: ~/.osa/knowledge/mistakes.md]
+    H --> L[This repo: .osa/knowledge/mistakes.md]
 ```
 
 - **Automatic:** `osa lessons due` reports when the last harvest is more than
   24 hours old. The session-start hook and the installed `AGENTS.md` and
   `CLAUDE.md` section then tell the agent to run `update-lesson` once at the
   end of its current task.
-- **Hosts:** Claude Code and Codex chats are read directly. ZCode keeps its
-  chat text out of local files today, so in ZCode the agent adds lessons from
-  the conversation it can see. For Grok, a DeepSeek client, or another app
-  that saves JSONL chats with `role` and `content` fields, add the folder to
-  `OSA_TRANSCRIPT_DIRS`.
+- **Hosts:** Claude Code, Codex, ZCode, and opencode chats are read directly
+  from their local stores, and so are Grok sessions, Cursor prompt history,
+  and T3 Code threads. For any other app that saves JSONL chats with `role`
+  and `content` fields, add the folder to `OSA_TRANSCRIPT_DIRS`.
+- **Tool mistakes:** the digest ends with `## Tool mistakes across chats`:
+  commands whose first try failed in two or more chats. The agent records the
+  call, what failed, and the working alternative in the mistakes files. At
+  `seen 3` an entry also climbs into the project `.osa/knowledge/index.md`
+  hot list, which is injected on every prompt, and its route files are named
+  when a prompt matches their keywords.
 - **Codex sandbox:** Codex in `workspace-write` cannot write your home
   folder. The harvest still runs and stores its time in the project, so it
   does not repeat after every task. To let Codex save personal lessons too,

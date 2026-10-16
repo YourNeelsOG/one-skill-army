@@ -167,6 +167,13 @@ def _cmd_install(args):
           + str(Path(args.path).resolve()))
     print("Automatic poteto routing active; token optimization: " + receipt["level"]
           + ". Start a new host session. No model setup is required.")
+    try:
+        from .lessons import ensure_user_knowledge
+        ensure_user_knowledge()
+    except OSError:
+        # Seeding the user-wide knowledge templates is a convenience; the
+        # install itself already succeeded.
+        pass
     return 0
 
 
@@ -190,7 +197,8 @@ def _cmd_lessons(args):
     "Print a harvest digest and record it, or report whether one is due."
     from . import lessons
     if args.action == "harvest":
-        print(lessons.render(lessons.harvest(hours=args.hours), budget=args.budget), end="")
+        events = lessons.collect(hours=args.hours)
+        print(lessons.render(lessons.users(events), budget=args.budget, events=events), end="")
         try:
             lessons.mark()
         except OSError as error:
@@ -208,8 +216,31 @@ def _cmd_hook(args):
     if args.event == "session-start":
         print(hook_session_start(args.path, level=args.level))
     else:
-        print(hook_prompt(args.path, level=args.level))
+        user_prompt = args.prompt or ""
+        if args.stdin:
+            user_prompt = _stdin_prompt() or user_prompt
+        print(hook_prompt(args.path, level=args.level, user_prompt=user_prompt))
     return 0
+
+
+def _stdin_prompt():
+    "The user prompt from a host hook JSON payload on stdin, or empty text."
+    try:
+        raw = sys.stdin.read()
+    except (OSError, ValueError):
+        return ""
+    if not raw:
+        return ""
+    try:
+        payload = json.loads(raw)
+    except ValueError:
+        return raw.strip()
+    if isinstance(payload, dict):
+        for key in ("prompt", "user_prompt"):
+            value = payload.get(key)
+            if isinstance(value, str):
+                return value
+    return ""
 
 
 def _cmd_measure(args):
@@ -358,6 +389,10 @@ def main(argv=None):
     p_hook.add_argument("--path", default=".")
     p_hook.add_argument("--level", default="ultra",
                         choices=["lite", "full", "ultra"])
+    p_hook.add_argument("--prompt", default=None,
+                        help="user prompt text used to match knowledge routes")
+    p_hook.add_argument("--stdin", action="store_true",
+                        help="read the host hook JSON payload from stdin")
     p_hook.set_defaults(func=_cmd_hook)
 
     p_explain = sub.add_parser("explain", help="a node's relations and role")

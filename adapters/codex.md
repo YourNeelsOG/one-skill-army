@@ -72,7 +72,8 @@ dependency setup.
 ## Lessons in the Codex sandbox
 
 `/update-lesson` (`$update-lesson` in Codex) reads recent chats and updates
-`~/.osa/knowledge/lessons.md` and `.osa/knowledge/lessons.md`. Codex in
+`~/.osa/knowledge/lessons.md`, `.osa/knowledge/lessons.md`, and the two
+`mistakes.md` files beside them. Codex in
 `workspace-write` cannot write your home folder: the harvest still runs and
 records its time in `.osa/knowledge/.last-harvest`, so the automatic run waits
 24 hours. To let Codex save personal lessons as well, start it with:

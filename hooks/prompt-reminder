@@ -20,8 +20,17 @@ fi
 LEVEL="${MODE:-ultra}"
 case "$LEVEL" in lite|full|ultra) ;; *) LEVEL="ultra" ;; esac
 
-# Live brief from the engine; static fallback keeps the hook working without it.
-reminder=$(PYTHONPATH="${PLUGIN_ROOT}" python3 -m osa hook prompt --level "$LEVEL" 2>/dev/null) || reminder=""
+# The host sends its per-prompt JSON payload on stdin (Claude Code, ZCode,
+# Cursor). Read it only when stdin is not a terminal, so a manual run in a
+# shell never blocks on cat; the engine extracts the prompt key itself.
+input=""
+if [ ! -t 0 ]; then
+  input=$(cat 2>/dev/null) || input=""
+fi
+
+# Live brief from the engine (with knowledge routing from the payload); the
+# static fallback keeps the hook working without the engine.
+reminder=$(printf '%s' "$input" | PYTHONPATH="${PLUGIN_ROOT}" python3 -m osa hook prompt --level "$LEVEL" --stdin 2>/dev/null) || reminder=""
 if [ -z "$reminder" ]; then
   reminder="One Skill Army active: ladder before code (does it need to exist? can it be shorter and still do the same work?), terse prose (never terse facts), verify before claiming done, no em dashes, git-safety rails hold. Read .osa/context.md instead of scanning the repo. Mode levels: lite/full/ultra/off only."
 fi

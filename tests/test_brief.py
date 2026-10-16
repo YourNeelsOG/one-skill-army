@@ -31,6 +31,13 @@ class TestBrief(unittest.TestCase):
     def test_brief_points_to_the_prebuilt_context(self):
         self.assertIn(".osa/context.md", brief())
 
+    def test_brief_requires_compaction_at_40_percent(self):
+        """Hosts without hooks (Codex) read the anchor; every host reads the brief."""
+        text = brief().lower()
+        self.assertIn("40%", text)
+        self.assertIn("compact", text)
+        self.assertIn("handoff", text)
+
     def test_brief_persists_across_model_switch(self):
         self.assertIn("model switch", brief().lower())
 

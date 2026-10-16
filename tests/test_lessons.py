@@ -17,6 +17,8 @@ sys.path.insert(0, str(ROOT))
 
 USER_FILE = "~/.osa/knowledge/lessons.md"
 PROJECT_FILE = ".osa/knowledge/lessons.md"
+USER_MISTAKES = "~/.osa/knowledge/mistakes.md"
+PROJECT_MISTAKES = ".osa/knowledge/mistakes.md"
 
 
 class TestLessons(unittest.TestCase):
@@ -24,20 +26,32 @@ class TestLessons(unittest.TestCase):
         self.assertIn(USER_FILE, text, where)
         self.assertIn(PROJECT_FILE, text, where)
 
+    def assert_mistakes_scopes(self, text, where):
+        self.assertIn(USER_MISTAKES, text, where)
+        self.assertIn(PROJECT_MISTAKES, text, where)
+
     def test_memory_skill_defines_lessons_contract(self):
         text = (ROOT / "skills/memory/SKILL.md").read_text()
         self.assertIn("## Lessons", text)
         self.assert_both_scopes(text, "memory skill")
+        self.assert_mistakes_scopes(text, "memory skill")
         # The section's example block has its own "## " headings, so stop at the
         # next real section instead of the next heading.
         section = text.split("## Lessons", 1)[1].split("## Compaction protocol", 1)[0].lower()
         for phrase in ("seen", "never grant", "150 lines"):
             self.assertIn(phrase, section)
 
+    def test_memory_skill_compacts_at_40_percent(self):
+        text = (ROOT / "skills/memory/SKILL.md").read_text()
+        section = text.split("## Compaction protocol", 1)[1].split("## With an installed", 1)[0]
+        self.assertIn("40%", section)
+        self.assertIn("compact", section.lower())
+
     def test_orchestrator_and_project_rules_read_lessons(self):
         for name in ("skills/one-skill-army/SKILL.md", "AGENTS.md"):
             text = (ROOT / name).read_text()
             self.assert_both_scopes(text, name)
+            self.assert_mistakes_scopes(text, name)
             self.assertIn("update-lesson", text, name)
 
     def test_project_install_anchor_reads_lessons(self):
@@ -48,6 +62,7 @@ class TestLessons(unittest.TestCase):
             install_project(project, ROOT, hosts=("codex",))
             anchor = (project / "AGENTS.md").read_text()
             self.assert_both_scopes(anchor, "anchor")
+            self.assert_mistakes_scopes(anchor, "anchor")
             # Hosts without a session hook rely on the anchor for automatic harvests.
             self.assertIn("lessons due", anchor)
             self.assertIn("update-lesson", anchor)
@@ -60,7 +75,9 @@ class TestLessons(unittest.TestCase):
                                     env=environment, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.dumps(json.loads(result.stdout))
-        self.assert_both_scopes(payload.split("Session start protocol", 1)[1], "hook protocol")
+        protocol = payload.split("Session start protocol", 1)[1]
+        self.assert_both_scopes(protocol, "hook protocol")
+        self.assert_mistakes_scopes(protocol, "hook protocol")
 
 
 if __name__ == "__main__":
